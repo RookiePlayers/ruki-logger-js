@@ -1,21 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "Bundler",
+    "module": "commonjs",
+    "target": "ES2016",
     "outDir": "dist",
-    "declaration": true,
-    "emitDeclarationOnly": false,
-    "sourceMap": true,
-    "inlineSources": true,
-    "strict": true,
-    "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
   },
-  "include": [
-    "src",
-    "example"
-  ]
+  "include": ["firebase_admin_service.json", "**/*.ts"]
 }
+
