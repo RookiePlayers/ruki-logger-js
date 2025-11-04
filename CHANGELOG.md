@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.2...v1.0.3) (2025-11-04)
+
+
+### Bug Fixes
+
+* Update .npmignore, package.json main entry point, and tsconfig settings ([a5e8923](https://github.com/RookiePlayers/ruki-logger-js/commit/a5e89232e98b6f7c7975b99a4b63c3f0b542ca1c))
+
 ## [1.0.2](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.1...v1.0.2) (2025-11-04)
 
 
