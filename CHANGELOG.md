@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.0...v1.0.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* Bump version to 1.0.0 and clean up package.json ([81d17dd](https://github.com/RookiePlayers/ruki-logger-js/commit/81d17dd36d4dea7322c831c6d73aba21f9d3fa99))
+
 # 1.0.0 (2025-11-04)
 
 
