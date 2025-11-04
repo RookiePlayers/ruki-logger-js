@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import chalk from "chalk";
 import { LoggingRegistry } from "./registry";
@@ -28,49 +29,49 @@ function toMessage(prefix: string, body: unknown, withLocation = true): { text: 
 }
 
 export class Logger {
-  static log(message: string, opts?: LoggerOptions) {
+  static log(message: string, _opts?: LoggerOptions) {
     const payload = toMessage("INFO", message);
     LoggingRegistry.emit(LogLevel.info, { message, location: payload.location, timestamp: ts(), raw: message, level: LogLevel.info });
     console.log(payload.text);
   }
 
-  static error(object: unknown, opts?: LoggerOptions) {
+  static error(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.red("ERROR"), object);
     LoggingRegistry.emit(LogLevel.error, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.error });
     console.error(m.text);
   }
 
-  static test(object: unknown, opts?: LoggerOptions) {
+  static test(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.green("TEST"), object);
     LoggingRegistry.emit(LogLevel.test, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.test });
     console.log(m.text);
   }
 
-  static highlight(object: unknown, opts?: LoggerOptions) {
+  static highlight(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.yellowBright("HIGHLIGHT"), object);
     LoggingRegistry.emit(LogLevel.highlight, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.highlight });
     console.log(m.text);
   }
 
-  static warn(object: unknown, opts?: LoggerOptions) {
+  static warn(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.yellow("Warning"), object);
     LoggingRegistry.emit(LogLevel.warn, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.warn });
     console.warn(m.text);
   }
 
-  static info(object: unknown, opts?: LoggerOptions) {
+  static info(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.gray("INFO"), object);
     LoggingRegistry.emit(LogLevel.info, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.info });
     console.log(m.text);
   }
 
-  static task(object: unknown, opts?: LoggerOptions) {
+  static task(object: unknown, _opts?: LoggerOptions) {
     const m = toMessage(chalk.green("TASK"), `${String(object)} ✔`);
     LoggingRegistry.emit(LogLevel.task, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.task });
     console.log(m.text);
   }
 
-  static custom(object: unknown, colorHex: string, opts?: LoggerOptions) {
+  static custom(object: unknown, colorHex: string, _opts?: LoggerOptions) {
     const m = toMessage(chalk.hex(colorHex)("CUSTOM"), object);
     LoggingRegistry.emit(LogLevel.custom, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.custom });
     console.log(m.text);

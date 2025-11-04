@@ -1,7 +1,7 @@
 
-import { Logger, LoggingRegistry, LogLevel } from "../src";
+import { Logger, LoggingRegistry } from "../src";
 
-const unsubscribe = LoggingRegistry.addSink((level, payload) => {
+const unsubscribe = LoggingRegistry.addSink(() => {
   // Example sink: mirror payload to stdout in JSON
   // In production, send to your APM or DB here
   // console.log("[sink]", JSON.stringify({ level, ...payload }));
