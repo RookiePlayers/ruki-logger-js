@@ -20,15 +20,6 @@
   },
   "homepage": "https://github.com/RookiePlayers/ruki-logger-js#readme",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "sideEffects": false,
   "scripts": {
     "build": "tsc -p .",
     "lint": "eslint . --ext .ts",
