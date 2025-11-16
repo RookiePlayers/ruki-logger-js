@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2016",
+    "module": "es2020",
+    "target": "ES2020",
+    "moduleResolution": "node10",
     "outDir": "dist",
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -11,4 +12,3 @@
   },
   "include": ["firebase_admin_service.json", "**/*.ts"]
 }
-
