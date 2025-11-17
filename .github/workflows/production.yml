@@ -7,9 +7,7 @@ on:
         - 'main'
   workflow_dispatch:
   
-permissions:
-  contents: write
-  id-token: write 
+
   
 jobs:
   production-ci:

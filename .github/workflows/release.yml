@@ -6,7 +6,9 @@ on:
       target-env:
         required: true
         type: string
-
+permissions:
+  contents: read
+  id-token: write 
 jobs:
   release:
     name: Release on Conventional Commit
