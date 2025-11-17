@@ -17,8 +17,22 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
       "default": "./dist/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ]
     }
   },
   "files": [
@@ -40,7 +54,9 @@
     "postinstall": "npx husky install",
     "prepare": "npm run build",
     "build": "tsup",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test:consumer": "node scripts/run-consumer-test.mjs",
+    "prepublishOnly": "npm run build && npm run test:consumer"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^20.0.0",
