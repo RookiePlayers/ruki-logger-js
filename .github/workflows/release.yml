@@ -39,6 +39,7 @@ jobs:
         run: npx semantic-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Extract latest tag (version)
         if: success()
