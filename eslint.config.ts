@@ -1,11 +1,30 @@
+// eslint.config.js (ESLint v9 flat config)
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
 
-export default defineConfig([
-  { 
+// Top-level ignore applies to everything (JS in dist, etc.)
+export default [
+  {
+    ignores: ["dist/**", "node_modules/**", "example/**", "__tests__/**", "coverage/**"],
+  },
+
+  // TypeScript ESLint recommended presets
+  ...tseslint.configs.recommended,
+
+  // Your project-specific tweaks
+  {
     files: ["**/*.{ts,mts,cts}"],
-    ignores: ["dist/**", "node_modules/**", "example/**", "tests/**"],
-     languageOptions: { globals: globals.browser } },
-  tseslint.configs.recommended,
-]);
+    // If this is a Node project, use node globals. For browser libs, use globals.browser.
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.es2021,
+      },
+      // (Optional) parserOptions if you need them:
+      // parserOptions: { project: false },
+    },
+    rules: {
+      // your rules here
+    },
+  },
+];

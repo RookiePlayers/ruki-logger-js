@@ -13,6 +13,7 @@
     "jest.config.js",
     "scripts/**",
     "coverage/**",
-    ".vscode/**"
+    ".vscode/**",
+    "dist/**",
   ]
 }
