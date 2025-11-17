@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.7...v1.0.8) (2025-11-17)
+
+
+### Bug Fixes
+
+* Add commit type check to control publish steps in deploy workflow ([b9a15d4](https://github.com/RookiePlayers/ruki-logger-js/commit/b9a15d4926f8030bef6beb4c999536a129015fc1))
+
 ## [1.0.7](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.6...v1.0.7) (2025-11-17)
 
 
