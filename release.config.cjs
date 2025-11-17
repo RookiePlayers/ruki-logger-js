@@ -13,11 +13,12 @@ module.exports = {
     [
       '@semantic-release/npm',
       {
-        npmPublish: true
+        npmPublish: false
       }
     ],
     '@semantic-release/changelog',
     [
+      '@semantic-release/git',  
       {
         "assets": ["package.json", "CHANGELOG.md"],
         "message": "chore(release): ${nextRelease.version} [skip ci]"

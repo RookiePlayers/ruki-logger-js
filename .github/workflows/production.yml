@@ -24,11 +24,18 @@ jobs:
     with:
       target-env: production
     secrets: inherit
-
   create-release:
     needs: build
     name: Tag Release
     uses: ./.github/workflows/release.yml
+    with:
+      target-env: production
+    secrets: inherit
+
+  publish:
+    needs: create-release
+    name: Publish to NPM
+    uses: ./.github/workflows/deploy.yml
     with:
       target-env: production
     secrets: inherit
