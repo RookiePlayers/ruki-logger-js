@@ -1,3 +1,11 @@
+## [1.0.9](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.8...v1.0.9) (2025-11-17)
+
+
+### Bug Fixes
+
+* Update build configuration and project structure ([a0337aa](https://github.com/RookiePlayers/ruki-logger-js/commit/a0337aa13f90f6d728f8ab22d9b853f31c067530))
+* Update build configuration and project structure ([401bf38](https://github.com/RookiePlayers/ruki-logger-js/commit/401bf38b3354d549a76f1afef5d4faa17679892e))
+
 ## [1.0.8](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.7...v1.0.8) (2025-11-17)
 
 
