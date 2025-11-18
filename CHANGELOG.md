@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.2.1...v1.3.0) (2025-11-18)
+
+
+### Features
+
+* **logger:** Enhance Logger options with customizable formatting, color overrides, and cell sizing ([c1f9cc4](https://github.com/RookiePlayers/ruki-logger-js/commit/c1f9cc4a2ff1d433fa72077aec2b0ce331b3a2a3))
+
 ## [1.2.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.2.0...v1.2.1) (2025-11-18)
 
 
