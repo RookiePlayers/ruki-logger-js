@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.1.0...v1.2.0) (2025-11-18)
+
+
+### Features
+
+* **logger:** Enhance logging functionality with customizable options and relative path support ([bb70c9b](https://github.com/RookiePlayers/ruki-logger-js/commit/bb70c9bdf640e3c131d12f9d60c58a7864b06a89))
+
 # [1.1.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.0.9...v1.1.0) (2025-11-17)
 
 
