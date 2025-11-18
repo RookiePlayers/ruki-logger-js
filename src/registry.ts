@@ -7,6 +7,7 @@ export type LogPayload = {
   timestamp: string;
   raw: unknown;
   level: LogLevel;
+  tag: string | undefined;
 };
 
 type Sink = (level: LogLevel, payload: LogPayload) => void;

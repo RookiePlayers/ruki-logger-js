@@ -93,42 +93,42 @@ export class Logger {
   private static lastLogTimestampMs: number | undefined;
   static log(message: string, options?: LoggerOptions) {
     const payload = toMessage(`[${options?.tag || "INFO"}]`, message, "#bcbcbcff", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.info, { message, location: payload.location, timestamp: ts(), raw: message, level: LogLevel.info });
+    LoggingRegistry.emit(LogLevel.info, { message, location: payload.location, timestamp: ts(), raw: message, level: LogLevel.info, tag: options?.tag });
     console.log(payload.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static error(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "ERROR"}]`, object, "#ce2727ff", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.error, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.error });
+    LoggingRegistry.emit(LogLevel.error, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.error, tag: options?.tag });
     console.error(m.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static test(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "TEST"}]`, object, "#219f21ff", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.test, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.test });
+    LoggingRegistry.emit(LogLevel.test, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.test, tag: options?.tag });
     console.log(m.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static highlight(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "HIGHLIGHT"}]`, object, "#ffff00", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.highlight, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.highlight });
+    LoggingRegistry.emit(LogLevel.highlight, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.highlight, tag: options?.tag });
     console.log(m.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static warn(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "WARNING"}]`, object, "#ffc400ff", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.warn, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.warn });
+    LoggingRegistry.emit(LogLevel.warn, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.warn, tag: options?.tag });
     console.warn(m.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static info(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "INFO"}]`, object, "#f5f5f5ff", options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.info, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.info });
+    LoggingRegistry.emit(LogLevel.info, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.info, tag: options?.tag });
     console.log(m.text);
     this.lastLogTimestampMs = Date.now();
   }
@@ -141,14 +141,14 @@ export class Logger {
 
   static task(object: unknown, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "TASK"}]`, `${String(object)}`, "#41c541ff", { rightSymbol: "✔", ...options }, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.task, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.task });
+    LoggingRegistry.emit(LogLevel.task, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.task, tag: options?.tag });
     console.log(m.text);
     this.lastLogTimestampMs = Date.now();
   }
 
   static custom(object: unknown, colorHex: string, options?: LoggerOptions) {
     const m = toMessage(`[${options?.tag || "CUSTOM"}]`, object, colorHex, options, this.lastLogTimestampMs);
-    LoggingRegistry.emit(LogLevel.custom, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.custom });
+    LoggingRegistry.emit(LogLevel.custom, { message: String(object), location: m.location, timestamp: ts(), raw: object, level: LogLevel.custom, tag: options?.tag });
     console.log(m.text);
     this.lastLogTimestampMs = Date.now();
   }
