@@ -8,6 +8,9 @@ A colorful, location‑aware logger for Node.js/TypeScript — inspired by your 
 - Pluggable sinks via a `LoggingRegistry` (for piping logs to files, DBs, APMs, etc.)
 - Tiny, framework‑agnostic API mirroring your Dart methods: `log`, `error`, `test`, `highlight`, `warn`, `info`, `task`, `custom(hex)`
 
+<img width="1052" height="219" alt="image" src="https://github.com/user-attachments/assets/e58d25a4-cbbb-4d36-8aab-eb6798d79bc5" />
+
+
 ## Install
 
 ```bash
