@@ -2,17 +2,17 @@
   <a href="https://www.npmjs.com/package/ruki-logger">
     <img src="https://img.shields.io/npm/v/ruki-logger?color=blue&label=npm" alt="npm version" />
   </a>
-  <a href="https://github.com/ollie2224/ruki-logger-js/actions">
-    <img src="https://github.com/ollie2224/ruki-logger-js/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  <a href="https://github.com/RookiePlayers/ruki-logger-js/actions">
+    <img src="https://github.com/RookiePlayers/ruki-logger-js/actions/workflows/production.yml/badge.svg" alt="CI status" />
   </a>
-  <a href="https://github.com/ollie2224/ruki-logger-js/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/ollie2224/ruki-logger-js?color=green" alt="MIT License" />
+  <a href="https://github.com/RookiePlayers/ruki-logger-js/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/RookiePlayers/ruki-logger-js?color=green" alt="MIT License" />
   </a>
   <a href="https://bundlephobia.com/package/ruki-logger">
     <img src="https://img.shields.io/bundlephobia/minzip/ruki-logger?label=size" alt="Bundle size" />
   </a>
-  <a href="https://github.com/ollie2224/ruki-logger-js">
-    <img src="https://img.shields.io/github/stars/ollie2224/ruki-logger-js?style=social" alt="GitHub stars" />
+  <a href="https://github.com/RookiePlayers/ruki-logger-js">
+    <img src="https://img.shields.io/github/stars/RookiePlayers/ruki-logger-js?style=social" alt="GitHub stars" />
   </a>
 </p>
 
