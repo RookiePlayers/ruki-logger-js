@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.1...v1.3.2) (2025-11-18)
+
+
+### Bug Fixes
+
+* Update LICENSE and README for new copyright and repository links ([9fee3a4](https://github.com/RookiePlayers/ruki-logger-js/commit/9fee3a4f3955ed77f49676911ffd6d346a5c767f))
+
 ## [1.3.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.0...v1.3.1) (2025-11-18)
 
 
