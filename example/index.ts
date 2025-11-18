@@ -3,6 +3,24 @@ import { formatDate } from "date-fns";
 import { Logger, LoggingRegistry, LogLevel } from "../src/index.ts";
 import { promises as fs } from "fs";
 
+Logger.configure({
+  hideTimestamp: false,
+  timestampFormat: "time",
+  format: "#2%##8%###2%####",
+  enableLevelTagging: true,
+  tagDecorator: "<>",
+  colorOptions: {
+    timestamp: "#b3bfbfff",
+    location: "#7f8c8d",
+  },
+  cellSizes: {
+    timestamp: { min: 26 },
+    tag: { min: 12 },
+    message: { min: 28, max: 60 },
+    location: { min: 32 },
+  },
+});
+
 const saveTofile = async (filename: string, data: string) => {
     try {
       await fs.writeFile(filename, data, { encoding: "utf8", flag: "a"});
@@ -74,6 +92,33 @@ Logger.custom(
     colorOnlyTag: true,
   }
 );
+
+// 6. Custom formatter string (message after location)
+Logger.info("Formatter demo", {
+  format: "#4%##2%####4%###",
+  hideTimestamp: false,
+});
+
+// 7. Per-call decorator & color overrides
+Logger.warn("Decorated tag warning", {
+  tagDecorator: "{}{}",
+  colorOptions: {
+    tag: "#ff6b6b",
+    message: "#ffeaa7",
+  },
+  hideTimestamp: false,
+});
+
+// 8. Fixed-width columns for every segment
+Logger.info("Aligned columns", {
+  hideTimestamp: false,
+  cellSizes: {
+    timestamp: { min: 25 },
+    tag: { min: 10 },
+    message: { min: 24, max: 40 },
+    location: { min: 28 },
+  },
+});
 
 unsubscribe();
 Logger.info("Sink removed");

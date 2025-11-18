@@ -1,3 +1,20 @@
+<p align="left">
+  <a href="https://www.npmjs.com/package/ruki-logger">
+    <img src="https://img.shields.io/npm/v/ruki-logger?color=blue&label=npm" alt="npm version" />
+  </a>
+  <a href="https://github.com/ollie2224/ruki-logger-js/actions">
+    <img src="https://github.com/ollie2224/ruki-logger-js/actions/workflows/ci.yml/badge.svg" alt="CI status" />
+  </a>
+  <a href="https://github.com/ollie2224/ruki-logger-js/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/ollie2224/ruki-logger-js?color=green" alt="MIT License" />
+  </a>
+  <a href="https://bundlephobia.com/package/ruki-logger">
+    <img src="https://img.shields.io/bundlephobia/minzip/ruki-logger?label=size" alt="Bundle size" />
+  </a>
+  <a href="https://github.com/ollie2224/ruki-logger-js">
+    <img src="https://img.shields.io/github/stars/ollie2224/ruki-logger-js?style=social" alt="GitHub stars" />
+  </a>
+</p>
 
 # ruki-logger
 
@@ -9,7 +26,6 @@ A colorful, location‑aware logger for Node.js/TypeScript — inspired by your 
 - Tiny, framework‑agnostic API mirroring your Dart methods: `log`, `error`, `test`, `highlight`, `warn`, `info`, `task`, `custom(hex)`
 
 <img width="1052" height="219" alt="image" src="https://github.com/user-attachments/assets/e58d25a4-cbbb-4d36-8aab-eb6798d79bc5" />
-
 
 ## Install
 
@@ -78,6 +94,39 @@ Logger.custom(
     colorOnlyTag: true,
   }
 );
+
+// 6. Custom formatter (location before message)
+Logger.info("Formatter demo", {
+  format: "#4%##2%####4%###",
+  hideTimestamp: false,
+});
+
+// 7. Decorators & color overrides
+Logger.warn("Decorated tag warning", {
+  tagDecorator: "{}{}",
+  colorOptions: {
+    tag: "#ff6b6b",
+    message: "#ffeaa7",
+  },
+  hideTimestamp: false,
+});
+
+// 8. Fixed-width columns
+Logger.info("Aligned columns", {
+  hideTimestamp: false,
+  cellSizes: {
+    timestamp: { min: 25 },
+    tag: { min: 10 },
+    message: { min: 24, max: 42 },
+    location: { min: 28 },
+  },
+});
+
+// 9. Level tagging inside message body
+Logger.info("Indexed 2k docs", {
+  enableLevelTagging: true,
+  tag: "DB",
+});
 ```
 
 ## API
@@ -85,10 +134,91 @@ Logger.custom(
 ### `LoggerOptions`
 
 ```ts
-type LoggerOptions = { isDebug?: boolean }
+type LoggerOptions = {
+  tag?: string;
+  isDebug?: boolean;
+  colorOnlyTag?: boolean;
+  leftSymbol?: string;
+  rightSymbol?: string;
+  showLocation?: boolean;
+  locationPath?: "relative" | "absolute";
+  hideTimestamp?: boolean;
+  timestampFormat?:
+    | "iso"
+    | "locale"
+    | "time"
+    | "date"
+    | "timeago"
+    | ((timestamp: Date) => string);
+  /**
+   * `#`=timestamp, `##`=tag, `###`=message, `####`=location.
+   * Numbers before `%` describe spaces between each segment.
+   */
+  format?: string;
+  /** wrap the tag in these characters (default: "[]") */
+  tagDecorator?: string;
+  colorOptions?: {
+    timestamp?: string;
+    tag?: string;
+    message?: string;
+    location?: string;
+  };
+  cellSizes?: {
+    timestamp?: { min?: number; max?: number };
+    tag?: { min?: number; max?: number };
+    message?: { min?: number; max?: number };
+    location?: { min?: number; max?: number };
+  };
+  enableLevelTagging?: boolean;
+};
 ```
-- `isDebug=true` prints using `console.*` (typical dev experience).  
-- `isDebug=false` also uses `console.*` (Node has no `developer.log`), but you can use this flag in your app to toggle sinks or verbosity.
+
+- `hideTimestamp` defaults to `true`. Set it to `false` and pick any `timestampFormat`.
+- `locationPath` can be `"relative"` or `"absolute"`, defaulting to relative paths.
+- `format` lets you rearrange timestamp/tag/message/location while specifying the spaces between each segment. Invalid strings fall back to `#1%##1%###1%####`.
+- `tagDecorator` wraps the tag with any characters (1 char mirrors, 2 chars become left/right, longer strings split evenly).
+- `colorOptions` can override the colors of each segment (timestamp/tag/message/location). By default, tag + message use the level color, timestamp is white, and location is gray.
+- `cellSizes` enforces min/max widths for each segment so multiple log lines stay aligned (e.g., pad the tag to 10 chars, trim messages at 80).
+- `enableLevelTagging` adds the level alias (e.g., `APP`, `NET`) before the message content, spaced using the same padding helpers.
+
+### Custom formats
+
+The format string only understands two tokens:
+
+- `#`, `##`, `###`, `####` which render **timestamp**, **tag**, **message**, and **location** respectively (each must appear once).
+- `<number>%` which inserts that many spaces between two segments.
+
+Examples:
+
+```
+#2%##4%###2%####  ->  2025-11-18T16:07:11.364Z  [WARNING]    Careful!  Location: example/index.ts:39
+#4%##2%####4%###  ->  2025-11-18T16:07:11.364Z    [WARNING]  Location: example/index.ts:39    Careful!
+```
+
+If a referenced segment is hidden (e.g., timestamp or location), the surrounding spaces are automatically removed.
+
+### Global defaults
+
+Call `Logger.configure()` once during startup to set project-wide defaults (you can still override per call):
+
+```ts
+Logger.configure({
+  hideTimestamp: false,
+  format: "#2%##4%###2%####",
+  tagDecorator: "<>",
+  colorOptions: {
+    timestamp: "#9b59b6",
+    location: "#7f8c8d",
+  },
+  cellSizes: {
+    timestamp: { min: 25 },
+    tag: { min: 10 },
+    message: { min: 24 },
+    location: { min: 30 },
+  },
+  enableLevelTagging: true,
+});
+```
 
 ### Methods
 
@@ -110,7 +240,13 @@ Logger.custom(object: unknown, colorHex: string, options?: LoggerOptions)
 Simple pub/sub for log events.
 
 ```ts
-type Sink = (level: LogLevel, payload: { message: string; location: string; timestamp: string; raw: unknown }) => void;
+type Sink = (level: LogLevel, payload: {
+  message: string;
+  location: string;
+  timestamp: string;
+  raw: unknown;
+  tag: string | undefined;
+}) => void;
 
 LoggingRegistry.addSink(sink: Sink): () => void     // returns an unsubscribe fn
 LoggingRegistry.removeSink(sink: Sink): void

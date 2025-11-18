@@ -10,6 +10,22 @@ export enum LogLevel {
   custom = "custom"
 }
 
+export type LoggerColorOptions = {
+  timestamp?: string;
+  tag?: string;
+  message?: string;
+  location?: string;
+};
+
+export type LoggerCellSizing = {
+  min?: number;
+  max?: number;
+};
+
+export type LoggerCellSizeOptions = Partial<
+  Record<"timestamp" | "tag" | "message" | "location", LoggerCellSizing>
+>;
+
 export type LoggerOptions = {
   isDebug?: boolean;
   leftSymbol?: string;
@@ -30,4 +46,22 @@ export type LoggerOptions = {
    * Format used when timestamps are shown. Defaults to "iso".
    */
   timestampFormat?: "iso" | "locale" | "time" | "date" | "timeago" | ((timestamp: Date) => string);
+  /**
+   * Defines the order of timestamp/tag/message/location using the pattern
+   * placeholders described in the README.
+   */
+  format?: string;
+  /**
+   * Characters used to wrap the tag. Defaults to [].
+   */
+  tagDecorator?: string;
+  /**
+   * Override colors for specific segments of the log line.
+   */
+  colorOptions?: LoggerColorOptions;
+  /**
+   * Control min/max widths for each segment to keep logs evenly spaced.
+   */
+  cellSizes?: LoggerCellSizeOptions;
+  enableLevelTagging?: boolean;
 };
