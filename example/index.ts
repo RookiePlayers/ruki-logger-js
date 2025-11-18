@@ -1,19 +1,79 @@
 
-import { Logger, LoggingRegistry } from "../src";
+import { formatDate } from "date-fns";
+import { Logger, LoggingRegistry, LogLevel } from "../src/index.ts";
+import { promises as fs } from "fs";
 
-const unsubscribe = LoggingRegistry.addSink(() => {
+const saveTofile = async (filename: string, data: string) => {
+    try {
+      await fs.writeFile(filename, data, { encoding: "utf8", flag: "a"});
+    } catch (error) {
+      console.error(`Failed to write to file ${filename}:`, error);
+    }
+}
+const unsubscribe = LoggingRegistry.addSink((level, payload) => {
   // Example sink: mirror payload to stdout in JSON
   // In production, send to your APM or DB here
   // console.log("[sink]", JSON.stringify({ level, ...payload }));
+  if(level === LogLevel.error) {
+    saveTofile("error_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.warn) {
+    saveTofile("warn_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.info) {
+    saveTofile("info_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.test) {
+    saveTofile("test_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.highlight) {
+    saveTofile("highlight_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.task) {
+    saveTofile("task_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else{
+    saveTofile("custom_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }
 });
 
-Logger.info("Booting up...");
-Logger.warn("Potential issue...");
-Logger.error(new Error("Something went wrong"));
-Logger.task("Build assets");
-Logger.highlight("Pay attention to this");
-Logger.test("A test log line");
-Logger.custom("Purple rain", "#9b59b6");
+
+Logger.info("Hello from ruki-logger");
+Logger.warn("Careful!");
+Logger.error(new Error("Boom"));
+Logger.task("Build completed");
+Logger.highlight("Important");
+Logger.test("Only during tests? up to you!");
+Logger.custom("Any hex color works", "#9b59b6");
+
+// 1. Default (relative file paths, timestamp hidden)
+Logger.info("Server ready");
+
+// 2. Show ISO timestamp and absolute path
+Logger.warn("Disk space low", {
+  hideTimestamp: false,
+  timestampFormat: "iso",
+  locationPath: "absolute",
+});
+
+// 3. Use locale timestamp and hide location
+Logger.info("Cache warmed", {
+  hideTimestamp: false,
+  timestampFormat: "locale",
+  showLocation: false,
+});
+
+// 4. Relative time (timeago) between logs
+Logger.task("Transcoding complete", {
+  hideTimestamp: false,
+  timestampFormat: "timeago",
+});
+
+// 5. Custom timestamp formatter + custom tag
+Logger.custom(
+  "Webhook delivered",
+  "#9b59b6",
+  {
+    tag: "WEBHOOK",
+    hideTimestamp: false,
+    timestampFormat: (now: Date) => formatDate(now, "HH:mm:ss 'on' MMMM do, yyyy"),
+    colorOnlyTag: true,
+  }
+);
 
 unsubscribe();
 Logger.info("Sink removed");

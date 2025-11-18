@@ -1,6 +1,10 @@
 // eslint.config.js (ESLint v9 flat config)
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
 
 // Top-level ignore applies to everything (JS in dist, etc.)
 export default [
@@ -9,6 +13,13 @@ export default [
   },
 
   // TypeScript ESLint recommended presets
+  {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir,
+      },
+    },
+  },
   ...tseslint.configs.recommended,
 
   // Your project-specific tweaks

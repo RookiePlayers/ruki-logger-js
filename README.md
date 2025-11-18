@@ -38,6 +38,45 @@ Logger.test("Only during tests? up to you!");
 Logger.custom("Any hex color works", "#9b59b6");
 ```
 
+### Configuration examples
+
+```ts
+// 1. Default (relative file paths, timestamp hidden)
+Logger.info("Server ready");
+
+// 2. Show ISO timestamp and absolute path
+Logger.warn("Disk space low", {
+  hideTimestamp: false,
+  timestampFormat: "iso",
+  locationPath: "absolute",
+});
+
+// 3. Use locale timestamp and hide location
+Logger.info("Cache warmed", {
+  hideTimestamp: false,
+  timestampFormat: "locale",
+  showLocation: false,
+});
+
+// 4. Relative time (timeago) between logs
+Logger.task("Transcoding complete", {
+  hideTimestamp: false,
+  timestampFormat: "timeago",
+});
+
+// 5. Custom timestamp formatter + custom tag
+Logger.custom(
+  "Webhook delivered",
+  "#9b59b6",
+  {
+    tag: "WEBHOOK",
+    hideTimestamp: false,
+    timestampFormat: (now) => now.toUTCString(),
+    colorOnlyTag: true,
+  }
+);
+```
+
 ## API
 
 ### `LoggerOptions`
