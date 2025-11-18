@@ -25,7 +25,11 @@ A colorful, location‑aware logger for Node.js/TypeScript — inspired by your 
 - Pluggable sinks via a `LoggingRegistry` (for piping logs to files, DBs, APMs, etc.)
 - Tiny, framework‑agnostic API mirroring your Dart methods: `log`, `error`, `test`, `highlight`, `warn`, `info`, `task`, `custom(hex)`
 
-<img width="1052" height="219" alt="image" src="https://github.com/user-attachments/assets/e58d25a4-cbbb-4d36-8aab-eb6798d79bc5" />
+<div style="display: inline-block">
+<img width="1052" height="219" alt="image" style="padding:12px" src="https://github.com/user-attachments/assets/e58d25a4-cbbb-4d36-8aab-eb6798d79bc5" />
+<img width="1187" height="255" alt="Screenshot 2025-11-18 at 17 58 25" style="padding:12px" src="https://github.com/user-attachments/assets/e0885df8-123f-413c-8ac5-8d0a0e7abe4a" />
+
+</div>
 
 ## Install
 
