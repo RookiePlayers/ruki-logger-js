@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.2.0...v1.2.1) (2025-11-18)
+
+
+### Bug Fixes
+
+* **logger:** Add tag support to log messages for enhanced context ([27e7f88](https://github.com/RookiePlayers/ruki-logger-js/commit/27e7f886f7f4fbe6fd606838696c7c091bda5140))
+
 # [1.2.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.1.0...v1.2.0) (2025-11-18)
 
 
