@@ -36,7 +36,16 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
   [LogLevel.custom]: "#bcbcbcff",
 };
 
-
+const LEVEL_ALIAS: Record<LogLevel, string> = {
+  [LogLevel.info]: "I",
+  [LogLevel.error]: "E",
+  [LogLevel.test]: "TS",
+  [LogLevel.highlight]: "H",
+  [LogLevel.warn]: "W",
+  [LogLevel.task]: "TK",
+  [LogLevel.quiet]: "Q",
+  [LogLevel.custom]: "C",
+};
 
 const DEFAULT_TAGS: Record<LogLevel, string> = {
   [LogLevel.info]: "INFO",
@@ -290,6 +299,22 @@ function mergeOptionSets(
   } as LoggerOptions;
 }
 
+function renderLevelBadge(level: LogLevel): string {
+  const alias = LEVEL_ALIAS[level];
+  const color = LEVEL_COLORS[level];
+  const chalkAny = chalk as unknown as {
+    bgHex?: (hex: string) => (text: string) => string;
+    hex?: (hex: string) => (text: string) => string;
+  };
+  if (typeof chalkAny.bgHex === "function") {
+    return chalkAny.bgHex(color)(alias);
+  }
+  if (typeof chalkAny.hex === "function") {
+    return chalkAny.hex(color)(alias);
+  }
+  return alias;
+}
+
 function buildLogLine(params: {
   level: LogLevel;
   baseColor: string;
@@ -297,16 +322,6 @@ function buildLogLine(params: {
   options: LoggerOptions;
   lastTimestampMs?: number;
 }): { text: string; location: string; tag: string } {
-  const LEVEL_TAGGING: Record<LogLevel, string> = {
-  [LogLevel.info]: chalk.bgHex(LEVEL_COLORS[LogLevel.info])("I"),
-  [LogLevel.error]: chalk.bgHex(LEVEL_COLORS[LogLevel.error])("E"),
-  [LogLevel.test]: chalk.bgHex(LEVEL_COLORS[LogLevel.test])("TS"),
-  [LogLevel.highlight]: chalk.bgHex(LEVEL_COLORS[LogLevel.highlight])("H"),
-  [LogLevel.warn]: chalk.bgHex(LEVEL_COLORS[LogLevel.warn])("W"),
-  [LogLevel.task]: chalk.bgHex(LEVEL_COLORS[LogLevel.task])("TK"),
-  [LogLevel.quiet]: chalk.bgHex(LEVEL_COLORS[LogLevel.quiet])("Q"),
-  [LogLevel.custom]: chalk.bgHex(LEVEL_COLORS[LogLevel.custom])("C"),
-}
   const { level, baseColor, body, options, lastTimestampMs } = params;
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";
@@ -328,7 +343,8 @@ function buildLogLine(params: {
     ? ""
     : formatTimestamp(options.timestampFormat, lastTimestampMs);
   const rawTag = decoratedTag;
-  const rawMessage = `${options.enableLevelTagging ? pad(LEVEL_TAGGING[level], "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
+  const levelBadge = options.enableLevelTagging ? renderLevelBadge(level) : "";
+  const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
   const rawLocation = showLocation ? `Location: ${location}` : "";
 
   const sizedTimestamp = applyCellSizing(rawTimestamp, cellSizes.timestamp);
