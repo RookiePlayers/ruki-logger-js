@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.4...v1.3.5) (2025-11-19)
+
+
+### Bug Fixes
+
+* Simplify color handling by introducing colorizeSegment function ([d347a7f](https://github.com/RookiePlayers/ruki-logger-js/commit/d347a7f53fe57f550906f31d6119f375ac966afe))
+
 ## [1.3.4](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.3...v1.3.4) (2025-11-19)
 
 
