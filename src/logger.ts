@@ -299,20 +299,36 @@ function mergeOptionSets(
   } as LoggerOptions;
 }
 
+type ChalkAdapter = {
+  bgHex?: (hex: string) => (text: string) => string;
+  hex?: (hex: string) => (text: string) => string;
+};
+
+const chalkAdapter = chalk as unknown as ChalkAdapter;
+
+function colorizeSegment(text?: string, hexColor?: string): string {
+  if (!text) return "";
+  if (hexColor && typeof chalkAdapter.hex === "function") {
+    try {
+      return chalkAdapter.hex(hexColor)(text);
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
 function renderLevelBadge(level: LogLevel): string {
   const alias = LEVEL_ALIAS[level];
   const color = LEVEL_COLORS[level];
-  const chalkAny = chalk as unknown as {
-    bgHex?: (hex: string) => (text: string) => string;
-    hex?: (hex: string) => (text: string) => string;
-  };
-  if (typeof chalkAny.bgHex === "function") {
-    return chalkAny.bgHex(color)(alias);
+  if (typeof chalkAdapter.bgHex === "function") {
+    try {
+      return chalkAdapter.bgHex(color)(alias);
+    } catch {
+      // fall through
+    }
   }
-  if (typeof chalkAny.hex === "function") {
-    return chalkAny.hex(color)(alias);
-  }
-  return alias;
+  return colorizeSegment(alias, color);
 }
 
 function buildLogLine(params: {
@@ -352,16 +368,10 @@ function buildLogLine(params: {
   const sizedMessage = applyCellSizing(rawMessage, cellSizes.message);
   const sizedLocation = applyCellSizing(rawLocation, cellSizes.location);
 
-  const timestamp = sizedTimestamp
-    ? chalk.hex(timestampColor)(sizedTimestamp)
-    : "";
-  const tagText = sizedTag ? chalk.hex(tagColor)(sizedTag) : "";
-  const messageText = sizedMessage
-    ? chalk.hex(messageColor)(sizedMessage)
-    : "";
-  const locationText = sizedLocation
-    ? chalk.hex(locationColor)(sizedLocation)
-    : "";
+  const timestamp = colorizeSegment(sizedTimestamp, timestampColor);
+  const tagText = colorizeSegment(sizedTag, tagColor);
+  const messageText = colorizeSegment(sizedMessage, messageColor);
+  const locationText = colorizeSegment(sizedLocation, locationColor);
 
   const formatted = renderFormattedLine(tokens, {
     timestamp,
