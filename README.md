@@ -18,7 +18,7 @@
 
 # ruki-logger
 
-A colorful, location‑aware logger for Node.js/TypeScript — inspired by your Flutter/Dart logger.
+A colorful,Configurable location‑aware logger.
 
 - Timestamps, level tags, and source **file:line** location
 - Pretty colors via **chalk**

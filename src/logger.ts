@@ -36,16 +36,7 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
   [LogLevel.custom]: "#bcbcbcff",
 };
 
-const LEVEL_TAGGING: Record<LogLevel, string> = {
-  [LogLevel.info]: chalk.bgHex(LEVEL_COLORS[LogLevel.info])("I"),
-  [LogLevel.error]: chalk.bgHex(LEVEL_COLORS[LogLevel.error])("E"),
-  [LogLevel.test]: chalk.bgHex(LEVEL_COLORS[LogLevel.test])("TS"),
-  [LogLevel.highlight]: chalk.bgHex(LEVEL_COLORS[LogLevel.highlight])("H"),
-  [LogLevel.warn]: chalk.bgHex(LEVEL_COLORS[LogLevel.warn])("W"),
-  [LogLevel.task]: chalk.bgHex(LEVEL_COLORS[LogLevel.task])("TK"),
-  [LogLevel.quiet]: chalk.bgHex(LEVEL_COLORS[LogLevel.quiet])("Q"),
-  [LogLevel.custom]: chalk.bgHex(LEVEL_COLORS[LogLevel.custom])("C"),
-}
+
 
 const DEFAULT_TAGS: Record<LogLevel, string> = {
   [LogLevel.info]: "INFO",
@@ -306,6 +297,16 @@ function buildLogLine(params: {
   options: LoggerOptions;
   lastTimestampMs?: number;
 }): { text: string; location: string; tag: string } {
+  const LEVEL_TAGGING: Record<LogLevel, string> = {
+  [LogLevel.info]: chalk.bgHex(LEVEL_COLORS[LogLevel.info])("I"),
+  [LogLevel.error]: chalk.bgHex(LEVEL_COLORS[LogLevel.error])("E"),
+  [LogLevel.test]: chalk.bgHex(LEVEL_COLORS[LogLevel.test])("TS"),
+  [LogLevel.highlight]: chalk.bgHex(LEVEL_COLORS[LogLevel.highlight])("H"),
+  [LogLevel.warn]: chalk.bgHex(LEVEL_COLORS[LogLevel.warn])("W"),
+  [LogLevel.task]: chalk.bgHex(LEVEL_COLORS[LogLevel.task])("TK"),
+  [LogLevel.quiet]: chalk.bgHex(LEVEL_COLORS[LogLevel.quiet])("Q"),
+  [LogLevel.custom]: chalk.bgHex(LEVEL_COLORS[LogLevel.custom])("C"),
+}
   const { level, baseColor, body, options, lastTimestampMs } = params;
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";

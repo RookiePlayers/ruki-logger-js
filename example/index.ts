@@ -5,18 +5,17 @@ import { promises as fs } from "fs";
 
 Logger.configure({
   hideTimestamp: false,
-  timestampFormat: "time",
-  format: "#2%##8%###2%####",
-  enableLevelTagging: true,
-  tagDecorator: "<>",
+  timestampFormat: "iso",
+  format: "#2%##2%####2%###",
+  tagDecorator: "[]",
   colorOptions: {
-    timestamp: "#b3bfbfff",
-    location: "#7f8c8d",
+    timestamp: "#cce8e8ff",
+    location: "#505a5bff",
   },
   cellSizes: {
     timestamp: { min: 26 },
     tag: { min: 12 },
-    message: { min: 28, max: 60 },
+    message: { min: 40, max: 100 },
     location: { min: 32 },
   },
 });
