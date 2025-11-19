@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.3...v1.3.4) (2025-11-19)
+
+
+### Bug Fixes
+
+* Enhance logging with level badges and refactor level tagging ([06d03d3](https://github.com/RookiePlayers/ruki-logger-js/commit/06d03d3a640211249e17aa773bc80810d3190d13))
+
 ## [1.3.3](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.2...v1.3.3) (2025-11-19)
 
 
