@@ -26,14 +26,14 @@ const formatCache = new Map<string, FormatToken[]>();
 const DEFAULT_FORMAT_TOKENS = parseFormatString(DEFAULT_FORMAT)!;
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
-  [LogLevel.info]: "#f5f5f5ff",
-  [LogLevel.error]: "#ce2727ff",
-  [LogLevel.test]: "#219f21ff",
+  [LogLevel.info]: "#f5f5f5",
+  [LogLevel.error]: "#ce2727",
+  [LogLevel.test]: "#219f21",
   [LogLevel.highlight]: "#ffff00",
-  [LogLevel.warn]: "#ffc400ff",
-  [LogLevel.task]: "#41c541ff",
-  [LogLevel.quiet]: "#545454ff",
-  [LogLevel.custom]: "#bcbcbcff",
+  [LogLevel.warn]: "#ffc400",
+  [LogLevel.task]: "#41c541",
+  [LogLevel.quiet]: "#545454",
+  [LogLevel.custom]: "#bcbcbc",
 };
 
 const LEVEL_ALIAS: Record<LogLevel, string> = {
@@ -309,8 +309,13 @@ const chalkAdapter = chalk as unknown as ChalkAdapter;
 function colorizeSegment(text?: string, hexColor?: string): string {
   if (!text) return "";
   if (hexColor && typeof chalkAdapter.hex === "function") {
+    let safeHex = hexColor;
+    // convert #rrggbbaa → #rrggbb for chalk
+    if (/^#([0-9a-fA-F]{8})$/.test(hexColor)) {
+      safeHex = `#${hexColor.slice(1, 7)}`;
+    }
     try {
-      return chalkAdapter.hex(hexColor)(text);
+      return chalkAdapter.hex(safeHex)(text);
     } catch {
       return text;
     }
