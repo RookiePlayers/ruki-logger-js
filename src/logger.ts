@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import chalk, { Chalk } from "chalk";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatDate, formatDistance } from "date-fns";
@@ -306,16 +306,40 @@ type ChalkAdapter = {
 
 const chalkAdapter = chalk as unknown as ChalkAdapter;
 
-function colorizeSegment(text?: string, hexColor?: string): string {
+function resolveChalkAdapter(
+  forceColorLevel?: LoggerOptions["forceColorLevel"],
+): ChalkAdapter {
+  if (forceColorLevel === undefined || forceColorLevel === null) {
+    return chalkAdapter;
+  }
+  let level = forceColorLevel;
+  if (typeof level === "boolean") {
+    level = level ? 3 : 0;
+  }
+  if (typeof level !== "number") {
+    return chalkAdapter;
+  }
+  try {
+    return new Chalk({ level }) as unknown as ChalkAdapter;
+  } catch {
+    return chalkAdapter;
+  }
+}
+
+function colorizeSegment(
+  text: string | undefined,
+  hexColor: string | undefined,
+  adapter: ChalkAdapter,
+): string {
   if (!text) return "";
-  if (hexColor && typeof chalkAdapter.hex === "function") {
+  if (hexColor && typeof adapter.hex === "function") {
     let safeHex = hexColor;
     // convert #rrggbbaa → #rrggbb for chalk
     if (/^#([0-9a-fA-F]{8})$/.test(hexColor)) {
       safeHex = `#${hexColor.slice(1, 7)}`;
     }
     try {
-      return chalkAdapter.hex(safeHex)(text);
+      return adapter.hex(safeHex)(text);
     } catch {
       return text;
     }
@@ -323,17 +347,17 @@ function colorizeSegment(text?: string, hexColor?: string): string {
   return text;
 }
 
-function renderLevelBadge(level: LogLevel): string {
+function renderLevelBadge(level: LogLevel, adapter: ChalkAdapter): string {
   const alias = LEVEL_ALIAS[level];
   const color = LEVEL_COLORS[level];
-  if (typeof chalkAdapter.bgHex === "function") {
+  if (typeof adapter.bgHex === "function") {
     try {
-      return chalkAdapter.bgHex(color)(alias);
+      return adapter.bgHex(color)(alias);
     } catch {
       // fall through
     }
   }
-  return colorizeSegment(alias, color);
+  return colorizeSegment(alias, color, adapter);
 }
 
 function buildLogLine(params: {
@@ -353,6 +377,7 @@ function buildLogLine(params: {
   const decoratedTag = decorateTag(tagLabel, options.tagDecorator);
   const colorOverrides = options.colorOptions ?? {};
   const cellSizes = options.cellSizes ?? {};
+  const adapter = resolveChalkAdapter(options.forceColorLevel);
 
   const timestampColor = colorOverrides.timestamp ?? DEFAULT_TIMESTAMP_COLOR;
   const tagColor = colorOverrides.tag ?? baseColor;
@@ -364,7 +389,7 @@ function buildLogLine(params: {
     ? ""
     : formatTimestamp(options.timestampFormat, lastTimestampMs);
   const rawTag = decoratedTag;
-  const levelBadge = options.enableLevelTagging ? renderLevelBadge(level) : "";
+  const levelBadge = options.enableLevelTagging ? renderLevelBadge(level, adapter) : "";
   const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
   const rawLocation = showLocation ? `Location: ${location}` : "";
 
@@ -373,10 +398,10 @@ function buildLogLine(params: {
   const sizedMessage = applyCellSizing(rawMessage, cellSizes.message);
   const sizedLocation = applyCellSizing(rawLocation, cellSizes.location);
 
-  const timestamp = colorizeSegment(sizedTimestamp, timestampColor);
-  const tagText = colorizeSegment(sizedTag, tagColor);
-  const messageText = colorizeSegment(sizedMessage, messageColor);
-  const locationText = colorizeSegment(sizedLocation, locationColor);
+  const timestamp = colorizeSegment(sizedTimestamp, timestampColor, adapter);
+  const tagText = colorizeSegment(sizedTag, tagColor, adapter);
+  const messageText = colorizeSegment(sizedMessage, messageColor, adapter);
+  const locationText = colorizeSegment(sizedLocation, locationColor, adapter);
 
   const formatted = renderFormattedLine(tokens, {
     timestamp,

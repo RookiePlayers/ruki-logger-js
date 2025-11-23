@@ -32,6 +32,10 @@ export type LoggerOptions = {
   rightSymbol?: string;
   showLocation?: boolean;
   colorOnlyTag?: boolean;
+  /**
+   * Force-enable or disable ANSI colors. Accepts chalk levels 0-3 or true/false (true = 3).
+   */
+  forceColorLevel?: 0 | 1 | 2 | 3 | boolean;
   tag?: string;
   /**
    * Controls how file paths appear in the location suffix.

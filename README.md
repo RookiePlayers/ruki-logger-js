@@ -131,6 +131,10 @@ Logger.info("Indexed 2k docs", {
   enableLevelTagging: true,
   tag: "DB",
 });
+
+// 10. Force colors when your runtime strips ANSI (Nest CLI/PM2/CI)
+Logger.configure({ forceColorLevel: true });
+Logger.warn("Colors stay enabled", { forceColorLevel: 3 });
 ```
 
 ## API
@@ -142,6 +146,7 @@ type LoggerOptions = {
   tag?: string;
   isDebug?: boolean;
   colorOnlyTag?: boolean;
+  forceColorLevel?: 0 | 1 | 2 | 3 | boolean;
   leftSymbol?: string;
   rightSymbol?: string;
   showLocation?: boolean;
@@ -182,6 +187,7 @@ type LoggerOptions = {
 - `format` lets you rearrange timestamp/tag/message/location while specifying the spaces between each segment. Invalid strings fall back to `#1%##1%###1%####`.
 - `tagDecorator` wraps the tag with any characters (1 char mirrors, 2 chars become left/right, longer strings split evenly).
 - `colorOptions` can override the colors of each segment (timestamp/tag/message/location). By default, tag + message use the level color, timestamp is white, and location is gray.
+- `forceColorLevel` overrides Chalk's color detection (handy when Nest/PM2/CI disables ANSI colors). `true` = level 3, `false` = no colors.
 - `cellSizes` enforces min/max widths for each segment so multiple log lines stay aligned (e.g., pad the tag to 10 chars, trim messages at 80).
 - `enableLevelTagging` adds the level alias (e.g., `APP`, `NET`) before the message content, spaced using the same padding helpers.
 
