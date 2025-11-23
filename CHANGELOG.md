@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.5...v1.3.6) (2025-11-23)
+
+
+### Bug Fixes
+
+* Correct color format by removing alpha channel from level colors ([1d8a2b5](https://github.com/RookiePlayers/ruki-logger-js/commit/1d8a2b5cd701811796c0e668b3a5365c6ebd7b27))
+
 ## [1.3.5](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.4...v1.3.5) (2025-11-19)
 
 
