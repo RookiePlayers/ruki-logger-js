@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.6...v1.4.0) (2025-11-23)
+
+
+### Features
+
+* Add forceColorLevel option to Logger for ANSI color control ([f607147](https://github.com/RookiePlayers/ruki-logger-js/commit/f607147a2d89d123e9f1772fbff646e53f1acfaa))
+
 ## [1.3.6](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.5...v1.3.6) (2025-11-23)
 
 
