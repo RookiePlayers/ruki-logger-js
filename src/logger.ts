@@ -299,6 +299,10 @@ function mergeOptionSets(
       ...(base?.colorOptions ?? {}),
       ...(overrides?.colorOptions ?? {}),
     },
+    levelColors: {
+      ...(base?.levelColors ?? {}),
+      ...(overrides?.levelColors ?? {}),
+    },
     cellSizes: mergeCellSizes(base?.cellSizes, overrides?.cellSizes),
   } as LoggerOptions;
 }
@@ -338,6 +342,10 @@ function resolveChalkAdapter(
   }
 }
 
+function resolveLevelColor(level: LogLevel, options: LoggerOptions): string {
+  return options.levelColors?.[level] ?? LEVEL_COLORS[level];
+}
+
 function colorizeSegment(
   text: string | undefined,
   hexColor: string | undefined,
@@ -358,11 +366,12 @@ function colorizeSegment(
 
 function getLevelTaggingConfig(
   level: LogLevel,
+  baseColor: string,
   overrides?: LoggerLevelTaggingOptions,
 ): { tag: string; color: string; bgColor?: string } {
   const defaults = {
     tag: LEVEL_ALIAS[level],
-    color: LEVEL_COLORS[level],
+    color: baseColor,
     bgColor: undefined,
   };
   const levelOverride = overrides?.[level];
@@ -377,9 +386,10 @@ function getLevelTaggingConfig(
 function renderLevelBadge(
   level: LogLevel,
   adapter: ChalkAdapter,
+  baseColor: string,
   overrides?: LoggerLevelTaggingOptions,
 ): string {
-  const config = getLevelTaggingConfig(level, overrides);
+  const config = getLevelTaggingConfig(level, baseColor, overrides);
   const fg = normalizeHex(config.color);
   const bg = normalizeHex(config.bgColor);
   let result = config.tag;
@@ -402,12 +412,11 @@ function renderLevelBadge(
 
 function buildLogLine(params: {
   level: LogLevel;
-  baseColor: string;
   body: unknown;
   options: LoggerOptions;
   lastTimestampMs?: number;
 }): { text: string; location: string; tag: string } {
-  const { level, baseColor, body, options, lastTimestampMs } = params;
+  const { level, body, options, lastTimestampMs } = params;
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";
   const location = getLocation(useRelative);
@@ -418,6 +427,7 @@ function buildLogLine(params: {
   const colorOverrides = options.colorOptions ?? {};
   const cellSizes = options.cellSizes ?? {};
   const adapter = resolveChalkAdapter(options.forceColorLevel);
+  const baseColor = resolveLevelColor(level, options);
 
   const timestampColor = colorOverrides.timestamp ?? DEFAULT_TIMESTAMP_COLOR;
   const tagColor = colorOverrides.tag ?? baseColor;
@@ -430,7 +440,7 @@ function buildLogLine(params: {
     : formatTimestamp(options.timestampFormat, lastTimestampMs);
   const rawTag = decoratedTag;
   const levelBadge = options.enableLevelTagging
-    ? renderLevelBadge(level, adapter, options.levelTaggingOptions)
+    ? renderLevelBadge(level, adapter, baseColor, options.levelTaggingOptions)
     : "";
   const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
   const rawLocation = showLocation ? `Location: ${location}` : "";
@@ -475,7 +485,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.info,
-      baseColor: LEVEL_COLORS[LogLevel.info],
       body: message,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -496,7 +505,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.error,
-      baseColor: LEVEL_COLORS[LogLevel.error],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -517,7 +525,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.test,
-      baseColor: LEVEL_COLORS[LogLevel.test],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -538,7 +545,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.highlight,
-      baseColor: LEVEL_COLORS[LogLevel.highlight],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -559,7 +565,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.warn,
-      baseColor: LEVEL_COLORS[LogLevel.warn],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -580,7 +585,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.info,
-      baseColor: LEVEL_COLORS[LogLevel.info],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -601,7 +605,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.quiet,
-      baseColor: LEVEL_COLORS[LogLevel.quiet],
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -614,7 +617,6 @@ export class Logger {
     const merged = this.mergeOptions({ rightSymbol: "✔", ...options });
     const payload = buildLogLine({
       level: LogLevel.task,
-      baseColor: LEVEL_COLORS[LogLevel.task],
       body: String(object),
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
@@ -635,7 +637,6 @@ export class Logger {
     const merged = this.mergeOptions(options);
     const payload = buildLogLine({
       level: LogLevel.custom,
-      baseColor: colorHex,
       body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,

@@ -36,6 +36,8 @@ export type LoggerLevelTaggingOptions = Partial<
   Record<LogLevel, LoggerLevelTaggingConfig>
 >;
 
+export type LoggerLevelColorOptions = Partial<Record<LogLevel, string>>;
+
 export type LoggerOptions = {
   isDebug?: boolean;
   leftSymbol?: string;
@@ -50,6 +52,10 @@ export type LoggerOptions = {
    * Customize per-level tag label and colors when level tagging is enabled.
    */
   levelTaggingOptions?: LoggerLevelTaggingOptions;
+  /**
+   * Override the default color used for each log level (hex string).
+   */
+  levelColors?: LoggerLevelColorOptions;
   tag?: string;
   /**
    * Controls how file paths appear in the location suffix.
