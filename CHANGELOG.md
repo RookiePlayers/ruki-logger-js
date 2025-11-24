@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.4.0...v1.4.1) (2025-11-24)
+
+
+### Bug Fixes
+
+* Add custom level tagging options for Logger ([bdeab30](https://github.com/RookiePlayers/ruki-logger-js/commit/bdeab30de44e2eb3e2debd214afa5be732d72f65))
+
 # [1.4.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.3.6...v1.4.0) (2025-11-23)
 
 
