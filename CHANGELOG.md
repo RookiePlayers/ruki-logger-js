@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.4.1...v1.5.0) (2025-11-24)
+
+
+### Features
+
+* Add levelColors option for customizable log level colors ([85063e9](https://github.com/RookiePlayers/ruki-logger-js/commit/85063e9838ba10bb9a157d90b75ed8522647e581))
+
 ## [1.4.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.4.0...v1.4.1) (2025-11-24)
 
 
