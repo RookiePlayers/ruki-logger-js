@@ -132,7 +132,16 @@ Logger.info("Indexed 2k docs", {
   tag: "DB",
 });
 
-// 10. Force colors when your runtime strips ANSI (Nest CLI/PM2/CI)
+// 10. Custom level tags/colors (foreground + background)
+Logger.info("Level badges your way", {
+  enableLevelTagging: true,
+  levelTaggingOptions: {
+    info: { tag: "I", color: "#0ff", bgColor: "#111" },
+    error: { tag: "ERR", bgColor: "#2b0000" }, // fg defaults to level color
+  },
+});
+
+// 11. Force colors when your runtime strips ANSI (Nest CLI/PM2/CI)
 Logger.configure({ forceColorLevel: true });
 Logger.warn("Colors stay enabled", { forceColorLevel: 3 });
 ```
@@ -179,6 +188,13 @@ type LoggerOptions = {
     location?: { min?: number; max?: number };
   };
   enableLevelTagging?: boolean;
+  levelTaggingOptions?: {
+    [level in LogLevel]?: {
+      tag?: string;
+      color?: string;
+      bgColor?: string;
+    };
+  };
 };
 ```
 
@@ -188,6 +204,7 @@ type LoggerOptions = {
 - `tagDecorator` wraps the tag with any characters (1 char mirrors, 2 chars become left/right, longer strings split evenly).
 - `colorOptions` can override the colors of each segment (timestamp/tag/message/location). By default, tag + message use the level color, timestamp is white, and location is gray.
 - `forceColorLevel` overrides Chalk's color detection (handy when Nest/PM2/CI disables ANSI colors). `true` = level 3, `false` = no colors.
+- `levelTaggingOptions` customizes the level badge when `enableLevelTagging` is on (per-level tag text, foreground color, and background color).
 - `cellSizes` enforces min/max widths for each segment so multiple log lines stay aligned (e.g., pad the tag to 10 chars, trim messages at 80).
 - `enableLevelTagging` adds the level alias (e.g., `APP`, `NET`) before the message content, spaced using the same padding helpers.
 

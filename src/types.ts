@@ -26,6 +26,16 @@ export type LoggerCellSizeOptions = Partial<
   Record<"timestamp" | "tag" | "message" | "location", LoggerCellSizing>
 >;
 
+export type LoggerLevelTaggingConfig = {
+  tag?: string;
+  color?: string;
+  bgColor?: string;
+};
+
+export type LoggerLevelTaggingOptions = Partial<
+  Record<LogLevel, LoggerLevelTaggingConfig>
+>;
+
 export type LoggerOptions = {
   isDebug?: boolean;
   leftSymbol?: string;
@@ -36,6 +46,10 @@ export type LoggerOptions = {
    * Force-enable or disable ANSI colors. Accepts chalk levels 0-3 or true/false (true = 3).
    */
   forceColorLevel?: 0 | 1 | 2 | 3 | boolean;
+  /**
+   * Customize per-level tag label and colors when level tagging is enabled.
+   */
+  levelTaggingOptions?: LoggerLevelTaggingOptions;
   tag?: string;
   /**
    * Controls how file paths appear in the location suffix.

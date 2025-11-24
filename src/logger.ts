@@ -3,7 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatDate, formatDistance } from "date-fns";
 import { LoggingRegistry } from "./registry";
-import { LogLevel, LoggerOptions } from "./types";
+import {
+  LogLevel,
+  LoggerLevelTaggingOptions,
+  LoggerOptions,
+} from "./types";
 
 const DEFAULT_FORMAT = "#1%##1%###1%####";
 const DEFAULT_TAG_DECORATOR = "[]";
@@ -306,6 +310,14 @@ type ChalkAdapter = {
 
 const chalkAdapter = chalk as unknown as ChalkAdapter;
 
+function normalizeHex(hexColor?: string): string | undefined {
+  if (!hexColor) return undefined;
+  if (/^#([0-9a-fA-F]{8})$/.test(hexColor)) {
+    return `#${hexColor.slice(1, 7)}`;
+  }
+  return hexColor;
+}
+
 function resolveChalkAdapter(
   forceColorLevel?: LoggerOptions["forceColorLevel"],
 ): ChalkAdapter {
@@ -333,11 +345,8 @@ function colorizeSegment(
 ): string {
   if (!text) return "";
   if (hexColor && typeof adapter.hex === "function") {
-    let safeHex = hexColor;
-    // convert #rrggbbaa → #rrggbb for chalk
-    if (/^#([0-9a-fA-F]{8})$/.test(hexColor)) {
-      safeHex = `#${hexColor.slice(1, 7)}`;
-    }
+    const safeHex = normalizeHex(hexColor);
+    if (!safeHex) return text;
     try {
       return adapter.hex(safeHex)(text);
     } catch {
@@ -347,17 +356,48 @@ function colorizeSegment(
   return text;
 }
 
-function renderLevelBadge(level: LogLevel, adapter: ChalkAdapter): string {
-  const alias = LEVEL_ALIAS[level];
-  const color = LEVEL_COLORS[level];
+function getLevelTaggingConfig(
+  level: LogLevel,
+  overrides?: LoggerLevelTaggingOptions,
+): { tag: string; color: string; bgColor?: string } {
+  const defaults = {
+    tag: LEVEL_ALIAS[level],
+    color: LEVEL_COLORS[level],
+    bgColor: undefined,
+  };
+  const levelOverride = overrides?.[level];
+  if (!levelOverride) return defaults;
+  return {
+    tag: levelOverride.tag ?? defaults.tag,
+    color: levelOverride.color ?? defaults.color,
+    bgColor: levelOverride.bgColor ?? defaults.bgColor,
+  };
+}
+
+function renderLevelBadge(
+  level: LogLevel,
+  adapter: ChalkAdapter,
+  overrides?: LoggerLevelTaggingOptions,
+): string {
+  const config = getLevelTaggingConfig(level, overrides);
+  const fg = normalizeHex(config.color);
+  const bg = normalizeHex(config.bgColor);
+  let result = config.tag;
   if (typeof adapter.bgHex === "function") {
     try {
-      return adapter.bgHex(color)(alias);
+      result = bg ? adapter.bgHex(bg)(result) : result;
     } catch {
       // fall through
     }
   }
-  return colorizeSegment(alias, color, adapter);
+  if (typeof adapter.hex === "function") {
+    try {
+      result = fg ? adapter.hex(fg)(result) : result;
+    } catch {
+      // fall through
+    }
+  }
+  return result;
 }
 
 function buildLogLine(params: {
@@ -389,7 +429,9 @@ function buildLogLine(params: {
     ? ""
     : formatTimestamp(options.timestampFormat, lastTimestampMs);
   const rawTag = decoratedTag;
-  const levelBadge = options.enableLevelTagging ? renderLevelBadge(level, adapter) : "";
+  const levelBadge = options.enableLevelTagging
+    ? renderLevelBadge(level, adapter, options.levelTaggingOptions)
+    : "";
   const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
   const rawLocation = showLocation ? `Location: ${location}` : "";
 
