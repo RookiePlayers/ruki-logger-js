@@ -196,7 +196,7 @@ function getLocation(useRelative: boolean): string {
   const m =
     line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
   if (m) {
-    let file = sanitizePath(m[1], useRelative);
+    const file = sanitizePath(m[1], useRelative);
     const row = m[2];
     return `${file}:${row}`;
   }
