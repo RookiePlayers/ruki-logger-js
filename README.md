@@ -59,6 +59,7 @@ Logger.task("Build completed");
 Logger.highlight("Important");
 Logger.test("Only during tests? up to you!");
 Logger.custom("Any hex color works", "#9b59b6");
+Logger.info("User payload", { id: 42, name: "Jane" }, { tag: "API" }); // console.log-style varargs
 ```
 
 ### Configuration examples
@@ -259,17 +260,20 @@ Logger.configure({
 
 ### Methods
 
-All methods add ISO timestamp and call‑site location.
+All methods add ISO timestamp and call‑site location. Pass any number of message
+arguments (just like `console.log`); if you need `LoggerOptions`, provide them as
+the final argument. For `Logger.custom`, the last non-options argument is treated
+as the hex color.
 
 ```ts
-Logger.log(message: string, options?: LoggerOptions)
-Logger.error(object: unknown, options?: LoggerOptions)
-Logger.test(object: unknown, options?: LoggerOptions)
-Logger.highlight(object: unknown, options?: LoggerOptions)
-Logger.warn(object: unknown, options?: LoggerOptions)
-Logger.info(object: unknown, options?: LoggerOptions)
-Logger.task(object: unknown, options?: LoggerOptions)
-Logger.custom(object: unknown, colorHex: string, options?: LoggerOptions)
+Logger.log(...args: unknown[])
+Logger.error(...args: unknown[])
+Logger.test(...args: unknown[])
+Logger.highlight(...args: unknown[])
+Logger.warn(...args: unknown[])
+Logger.info(...args: unknown[])
+Logger.task(...args: unknown[])
+Logger.custom(...args: unknown[]) // last non-options arg = color hex
 ```
 
 ### `LoggingRegistry`

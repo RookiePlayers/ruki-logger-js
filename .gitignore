@@ -20,6 +20,7 @@ Thumbs.db
 # Logs
 logs/
 *.log
+*.txt
 
 # IDEs and editors
 .vscode/
@@ -36,3 +37,4 @@ logs/
 # test
 __tests__/coverage/
 coverage/
+/clockit_backup_*.csv

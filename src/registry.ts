@@ -32,4 +32,5 @@ class _LoggingRegistry {
 }
 
 export const LoggingRegistry = new _LoggingRegistry();
+
 export type { Sink };

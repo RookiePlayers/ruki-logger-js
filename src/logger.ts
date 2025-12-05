@@ -2,6 +2,7 @@ import chalk, { Chalk } from "chalk";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatDate, formatDistance } from "date-fns";
+import { format, inspect } from "node:util";
 import { LoggingRegistry } from "./registry";
 import {
   LogLevel,
@@ -61,6 +62,66 @@ const DEFAULT_TAGS: Record<LogLevel, string> = {
   [LogLevel.quiet]: "QUIET",
   [LogLevel.custom]: "CUSTOM",
 };
+
+const LOGGER_OPTION_KEYS: Array<keyof LoggerOptions> = [
+  "isDebug",
+  "leftSymbol",
+  "rightSymbol",
+  "showLocation",
+  "colorOnlyTag",
+  "forceColorLevel",
+  "levelTaggingOptions",
+  "levelColors",
+  "tag",
+  "locationPath",
+  "hideTimestamp",
+  "timestampFormat",
+  "format",
+  "tagDecorator",
+  "colorOptions",
+  "cellSizes",
+  "enableLevelTagging",
+];
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isLoggerOptionsCandidate(value: unknown): value is LoggerOptions {
+  if (!isPlainObject(value)) return false;
+  return LOGGER_OPTION_KEYS.some((key) => key in value);
+}
+
+function splitArgsAndOptions(
+  args: unknown[],
+  minArgsAfterOptions: number = 1,
+): { args: unknown[]; options?: LoggerOptions } {
+  if (args.length > minArgsAfterOptions) {
+    const last = args[args.length - 1];
+    if (isLoggerOptionsCandidate(last)) {
+      return {
+        args: args.slice(0, -1),
+        options: last,
+      };
+    }
+  }
+  return { args };
+}
+
+function formatArguments(args: unknown[]): { message: string; raw: unknown } {
+  if (args.length === 0) return { message: "", raw: "" };
+  if (args.length === 1) {
+    const single = args[0];
+    if (typeof single === "string") {
+      return { message: single, raw: single };
+    }
+    return {
+      message: inspect(single, { depth: null, colors: false }),
+      raw: single,
+    };
+  }
+  return { message: format(...args), raw: args };
+}
 
 function getLocation(useRelative: boolean): string {
   const err = new Error();
@@ -412,11 +473,11 @@ function renderLevelBadge(
 
 function buildLogLine(params: {
   level: LogLevel;
-  body: unknown;
+  message: string;
   options: LoggerOptions;
   lastTimestampMs?: number;
 }): { text: string; location: string; tag: string } {
-  const { level, body, options, lastTimestampMs } = params;
+  const { level, message, options, lastTimestampMs } = params;
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";
   const location = getLocation(useRelative);
@@ -442,7 +503,7 @@ function buildLogLine(params: {
   const levelBadge = options.enableLevelTagging
     ? renderLevelBadge(level, adapter, baseColor, options.levelTaggingOptions)
     : "";
-  const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${String(body)}${pad(options.rightSymbol, "left", " ")}`;
+  const rawMessage = `${levelBadge ? pad(levelBadge, "right", " ", 2) : ""}${pad(options.leftSymbol, "right", " ")}${message}${pad(options.rightSymbol, "left", " ")}`;
   const rawLocation = showLocation ? `Location: ${location}` : "";
 
   const sizedTimestamp = applyCellSizing(rawTimestamp, cellSizes.timestamp);
@@ -481,175 +542,103 @@ export class Logger {
     return mergeOptionSets(this.globalOptions, options);
   }
 
-  static log(message: string, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
+  private static logWithLevel(
+    level: LogLevel,
+    consoleMethod: "log" | "warn" | "error",
+    args: unknown[],
+    baseOptions?: LoggerOptions,
+    emitToRegistry: boolean = true,
+  ) {
+    const { args: messages, options } = splitArgsAndOptions(args);
+    const mergedBase = mergeOptionSets(baseOptions, options);
+    const merged = this.mergeOptions(mergedBase);
+    const { message, raw } = formatArguments(messages);
     const payload = buildLogLine({
-      level: LogLevel.info,
-      body: message,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.info, {
+      level,
       message,
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: message,
-      level: LogLevel.info,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
-  }
-
-  static error(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.error,
-      body: object,
       options: merged,
       lastTimestampMs: this.lastLogTimestampMs,
     });
-    LoggingRegistry.emit(LogLevel.error, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.error,
-      tag: payload.tag,
-    });
-    console.error(payload.text);
+
+    if (emitToRegistry) {
+      LoggingRegistry.emit(level, {
+        message,
+        location: payload.location,
+        timestamp: isoTimestamp(),
+        raw,
+        level,
+        tag: payload.tag,
+      });
+    }
+
+    console[consoleMethod](payload.text);
     this.lastLogTimestampMs = Date.now();
   }
 
-  static test(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.test,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.test, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.test,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static log(message: unknown, options?: LoggerOptions): void;
+  static log(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.info, "log", args);
   }
 
-  static highlight(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.highlight,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.highlight, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.highlight,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static error(message: unknown, options?: LoggerOptions): void;
+  static error(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.error, "error", args);
   }
 
-  static warn(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.warn,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.warn, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.warn,
-      tag: payload.tag,
-    });
-    console.warn(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static test(message: unknown, options?: LoggerOptions): void;
+  static test(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.test, "log", args);
   }
 
-  static info(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.info,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.info, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.info,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static highlight(message: unknown, options?: LoggerOptions): void;
+  static highlight(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.highlight, "log", args);
   }
 
-  static quiet(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.quiet,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static warn(message: unknown, options?: LoggerOptions): void;
+  static warn(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.warn, "warn", args);
   }
 
-  static task(object: unknown, options?: LoggerOptions) {
-    const merged = this.mergeOptions({ rightSymbol: "✔", ...options });
-    const payload = buildLogLine({
-      level: LogLevel.task,
-      body: String(object),
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
-    });
-    LoggingRegistry.emit(LogLevel.task, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.task,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+  static info(message: unknown, options?: LoggerOptions): void;
+  static info(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.info, "log", args);
   }
 
-  static custom(object: unknown, colorHex: string, options?: LoggerOptions) {
-    const merged = this.mergeOptions(options);
-    const payload = buildLogLine({
-      level: LogLevel.custom,
-      body: object,
-      options: merged,
-      lastTimestampMs: this.lastLogTimestampMs,
+  static quiet(message: unknown, options?: LoggerOptions): void;
+  static quiet(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.quiet, "log", args, undefined, false);
+  }
+
+  static task(message: unknown, options?: LoggerOptions): void;
+  static task(...args: unknown[]): void {
+    this.logWithLevel(
+      LogLevel.task,
+      "log",
+      args,
+      { rightSymbol: "✔" },
+    );
+  }
+
+  static custom(
+    message: unknown,
+    colorHex: string,
+    options?: LoggerOptions,
+  ): void;
+  static custom(...args: unknown[]): void {
+    const { options, args: payload } = splitArgsAndOptions(args, 2);
+    if (payload.length === 0) {
+      return;
+    }
+    const colorCandidate = payload[payload.length - 1];
+    const resolvedColor =
+      typeof colorCandidate === "string"
+        ? colorCandidate
+        : LEVEL_COLORS[LogLevel.custom];
+    const messages = payload.slice(0, -1);
+    const baseOptions = mergeOptionSets(options, {
+      levelColors: { [LogLevel.custom]: resolvedColor },
     });
-    LoggingRegistry.emit(LogLevel.custom, {
-      message: String(object),
-      location: payload.location,
-      timestamp: isoTimestamp(),
-      raw: object,
-      level: LogLevel.custom,
-      tag: payload.tag,
-    });
-    console.log(payload.text);
-    this.lastLogTimestampMs = Date.now();
+    this.logWithLevel(LogLevel.custom, "log", messages, baseOptions);
   }
 }
