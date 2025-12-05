@@ -576,41 +576,49 @@ export class Logger {
   }
 
   static log(message: unknown, options?: LoggerOptions): void;
+  static log(...args: unknown[]): void;
   static log(...args: unknown[]): void {
     this.logWithLevel(LogLevel.info, "log", args);
   }
 
   static error(message: unknown, options?: LoggerOptions): void;
+  static error(...args: unknown[]): void;
   static error(...args: unknown[]): void {
     this.logWithLevel(LogLevel.error, "error", args);
   }
 
   static test(message: unknown, options?: LoggerOptions): void;
+  static test(...args: unknown[]): void;
   static test(...args: unknown[]): void {
     this.logWithLevel(LogLevel.test, "log", args);
   }
 
   static highlight(message: unknown, options?: LoggerOptions): void;
+  static highlight(...args: unknown[]): void;
   static highlight(...args: unknown[]): void {
     this.logWithLevel(LogLevel.highlight, "log", args);
   }
 
   static warn(message: unknown, options?: LoggerOptions): void;
+  static warn(...args: unknown[]): void;
   static warn(...args: unknown[]): void {
     this.logWithLevel(LogLevel.warn, "warn", args);
   }
 
   static info(message: unknown, options?: LoggerOptions): void;
+  static info(...args: unknown[]): void;
   static info(...args: unknown[]): void {
     this.logWithLevel(LogLevel.info, "log", args);
   }
 
   static quiet(message: unknown, options?: LoggerOptions): void;
+  static quiet(...args: unknown[]): void;
   static quiet(...args: unknown[]): void {
     this.logWithLevel(LogLevel.quiet, "log", args, undefined, false);
   }
 
   static task(message: unknown, options?: LoggerOptions): void;
+  static task(...args: unknown[]): void;
   static task(...args: unknown[]): void {
     this.logWithLevel(
       LogLevel.task,
@@ -625,6 +633,7 @@ export class Logger {
     colorHex: string,
     options?: LoggerOptions,
   ): void;
+  static custom(...args: unknown[]): void;
   static custom(...args: unknown[]): void {
     const { options, args: payload } = splitArgsAndOptions(args, 2);
     if (payload.length === 0) {
