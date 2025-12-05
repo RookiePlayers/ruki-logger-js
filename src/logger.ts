@@ -105,6 +105,7 @@ const LOGGER_OPTION_KEYS: Array<keyof LoggerOptions> = [
   "leftSymbol",
   "rightSymbol",
   "showLocation",
+  "locationStackDepth",
   "colorOnlyTag",
   "forceColorLevel",
   "levelTaggingOptions",
@@ -189,15 +190,30 @@ function sanitizePath(file: string, useRelative: boolean): string {
   return normalized;
 }
 
-function getLocation(useRelative: boolean): string {
+function getLocation(useRelative: boolean, stackDepth: number = 6): string {
   const err = new Error();
-  const stack = (err.stack || "").split("\n");
-  const line = stack[5] ||stack[4] || stack[3] || stack[2] || "";
-  const m =
-    line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
-  if (m) {
-    const file = sanitizePath(m[1], useRelative);
-    const row = m[2];
+  const stackLines = (err.stack || "").split("\n").map((line) => line.trim());
+  const isLoggerFrame = (line: string) =>
+    /ruki-logger/i.test(line) || /logger\.ts/.test(line);
+  const isNodeInternal = (line: string) =>
+    /\bnode:internal\b/.test(line) || /\binternal\//.test(line);
+  const isCandidateFrame = (line: string) =>
+    !isNodeInternal(line) &&
+    !isLoggerFrame(line) &&
+    (/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
+  const candidates = stackLines.filter((line) => isCandidateFrame(line));
+  const depthIndex = Math.max(0, Math.min((stackDepth || 1) - 1, Math.max(0, candidates.length - 1)));
+  const frame =
+    candidates[depthIndex] ||
+    stackLines.find((line) => isCandidateFrame(line)) ||
+    "";
+  const match =
+    frame.match(/(file:\/\/[^\s)]+|https?:\/\/[^\s)]+|[^()\s]+):(\d+):\d+/) ||
+    frame.match(/at ([^():\s]+):(\d+):\d+/) ||
+    frame.match(/([^@]+)@[^:]+:(\d+):\d+/);
+  if (match) {
+    const file = sanitizePath(match[1], useRelative);
+    const row = match[2];
     return `${file}:${row}`;
   }
   return "unknown";
@@ -514,7 +530,8 @@ function buildLogLine(params: {
   const { level, message, options, lastTimestampMs } = params;
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";
-  const location = getLocation(useRelative);
+  const locationDepth = options.locationStackDepth;
+  const location = getLocation(useRelative, locationDepth);
   const hideTimestamp = options.hideTimestamp ?? true;
   const showLocation = options.showLocation ?? true;
   const tagLabel = options.tag ?? DEFAULT_TAGS[level];

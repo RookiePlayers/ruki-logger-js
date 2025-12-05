@@ -61,7 +61,11 @@ export type LoggerOptions = {
    * Controls how file paths appear in the location suffix.
    * Defaults to "relative".
    */
-  locationPath?: "relative" | "absolute";
+ locationPath?: "relative" | "absolute";
+  /**
+   * Which stack frame to use for the reported location (1 = immediate caller). Defaults to 1.
+   */
+  locationStackDepth?: number;
   /**
    * When true, omit the timestamp from the log line. Defaults to true.
    */
