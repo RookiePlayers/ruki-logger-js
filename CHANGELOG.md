@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.5.0...v1.6.0) (2025-12-05)
+
+
+### Features
+
+* Implement file logging sink with configurable log file paths ([09b28fd](https://github.com/RookiePlayers/ruki-logger-js/commit/09b28fd8b8b84dd76b8bd994d117b3f3553abb3a))
+
 # [1.5.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.4.1...v1.5.0) (2025-11-24)
 
 
