@@ -1,8 +1,23 @@
 import { LoggingRegistry, LogPayload } from "./registry";
 import { LogLevel } from "./types";
-import { promises as fs } from "fs";
 import { format, startOfDay } from "date-fns";
 import { Logger } from "./logger";
+
+type FsPromises = typeof import("node:fs/promises");
+const FS_MODULE_ID = "node:fs/promises";
+
+let cachedFs: FsPromises | null = null;
+let fsInitialized = false;
+async function getFs(): Promise<FsPromises | null> {
+    if (fsInitialized) return cachedFs;
+    fsInitialized = true;
+    try {
+        cachedFs = await import(/* @vite-ignore */ FS_MODULE_ID);
+    } catch {
+        cachedFs = null;
+    }
+    return cachedFs;
+}
 
 export abstract class LoggerSinkConfig {
     abstract name: string;
@@ -56,15 +71,21 @@ export class FileSyncLoggerConfig extends LoggerSinkConfig {
         };
     }
     private saveTofile = async (filename: string, data: string) => {
+        const fs = await getFs();
+        if (!fs) {
+            Logger.warn("File sink unavailable: fs not supported in this environment");
+            return false;
+        }
         try {
             await fs.writeFile(`logs/${filename}`, data, { encoding: 'utf8', flag: 'a' });
         } catch (error) {
-            //if the file doesn't exist, create it
+            // if the file doesn't exist, create it
             if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
                 await fs.mkdir(`logs/${filename.split('/')[0]}`, { recursive: true });
                 await fs.writeFile(`logs/${filename}`, data, { encoding: 'utf8', flag: 'a' });
             } else {
                 Logger.warn(`Failed to write logs to file: ${(error as Error).message}`);
+                return false;
             }
         }
         return true;
