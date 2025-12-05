@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.0...v1.6.1) (2025-12-05)
+
+
+### Bug Fixes
+
+* Overload logging methods to accept variable arguments ([cdc5b75](https://github.com/RookiePlayers/ruki-logger-js/commit/cdc5b7524471424f18093547bfd82719fbf9a518))
+
 # [1.6.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.5.0...v1.6.0) (2025-12-05)
 
 
