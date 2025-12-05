@@ -1,3 +1,11 @@
+## [1.6.2](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.1...v1.6.2) (2025-12-05)
+
+
+### Bug Fixes
+
+* Add user payload logging with structured data ([3f96352](https://github.com/RookiePlayers/ruki-logger-js/commit/3f963527a2c22f58e7260e3b57758e1fef6309e4))
+* Add user payload logging with structured data ([efd3a43](https://github.com/RookiePlayers/ruki-logger-js/commit/efd3a430af8a3e71a589094e9eb21c0f4e4a10c1))
+
 ## [1.6.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.0...v1.6.1) (2025-12-05)
 
 
