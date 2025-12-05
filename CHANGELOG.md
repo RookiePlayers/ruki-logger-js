@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.4...v1.6.5) (2025-12-05)
+
+
+### Bug Fixes
+
+* Adjust stack trace parsing to improve location retrieval in getLocation function ([216e72b](https://github.com/RookiePlayers/ruki-logger-js/commit/216e72b503c9518558de3aafc073b23a416462b2))
+
 ## [1.6.4](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.3...v1.6.4) (2025-12-05)
 
 
