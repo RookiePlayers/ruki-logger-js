@@ -192,7 +192,7 @@ function sanitizePath(file: string, useRelative: boolean): string {
 function getLocation(useRelative: boolean): string {
   const err = new Error();
   const stack = (err.stack || "").split("\n");
-  const line = stack[4] || stack[3] || stack[2] || "";
+  const line = stack[5] ||stack[4] || stack[3] || stack[2] || "";
   const m =
     line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
   if (m) {
