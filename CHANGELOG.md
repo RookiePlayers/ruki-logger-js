@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.2...v1.6.3) (2025-12-05)
+
+
+### Bug Fixes
+
+* Enhance file logging by dynamically importing fs and handling unsupported environments ([efc7607](https://github.com/RookiePlayers/ruki-logger-js/commit/efc760761969820ebec9ed22b4bee8d98fddbed9))
+
 ## [1.6.2](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.1...v1.6.2) (2025-12-05)
 
 
