@@ -118,6 +118,6 @@ Logger.info("Aligned columns", {
     location: { min: 28 },
   },
 });
-
+ Logger.info("User payload", { id: 42, name: "Jane" }, { tag: "API" });
 unsubscribe();
 Logger.info("Sink removed");

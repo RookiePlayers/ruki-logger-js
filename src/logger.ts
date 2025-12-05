@@ -1,8 +1,5 @@
 import chalk, { Chalk } from "chalk";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { formatDate, formatDistance } from "date-fns";
-import { format, inspect } from "node:util";
 import { LoggingRegistry } from "./registry";
 import {
   LogLevel,
@@ -15,6 +12,46 @@ const DEFAULT_TAG_DECORATOR = "[]";
 const DEFAULT_TIMESTAMP_COLOR = "#ffffff";
 const DEFAULT_LOCATION_COLOR = "#808080";
 const NEUTRAL_MESSAGE_COLOR = "#f5f5f5ff";
+
+function circularReplacer() {
+  const seen = new WeakSet();
+  return (_key: string, value: unknown) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) return "[Circular]";
+      seen.add(value);
+    }
+    return value;
+  };
+}
+
+function stringifyValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (value === null || value === undefined) {
+    return String(value);
+  }
+  if (typeof value === "bigint") {
+    return `${value}n`;
+  }
+  if (typeof value === "symbol") {
+    return value.toString();
+  }
+  try {
+    return JSON.stringify(value, circularReplacer());
+  } catch {
+    try {
+      return String(value);
+    } catch {
+      return "[Unserializable]";
+    }
+  }
+}
+
+function formatList(args: unknown[]): string {
+  return args.map((item) => stringifyValue(item)).join(" ");
+}
 
 type FormatSegment = "timestamp" | "tag" | "message" | "location";
 type FormatToken =
@@ -115,12 +152,41 @@ function formatArguments(args: unknown[]): { message: string; raw: unknown } {
     if (typeof single === "string") {
       return { message: single, raw: single };
     }
-    return {
-      message: inspect(single, { depth: null, colors: false }),
-      raw: single,
-    };
+    return { message: stringifyValue(single), raw: single };
   }
-  return { message: format(...args), raw: args };
+  return { message: formatList(args), raw: args };
+}
+
+function sanitizePath(file: string, useRelative: boolean): string {
+  let normalized = file;
+  if (normalized.startsWith("file://")) {
+    try {
+      normalized = new URL(normalized).pathname;
+      if (/^\/[A-Za-z]:/.test(normalized)) {
+        normalized = normalized.slice(1);
+      }
+    } catch {
+      // ignore invalid URL, keep original string
+    }
+  }
+  if (useRelative) {
+    const hasProcess =
+      typeof process !== "undefined" && typeof process.cwd === "function";
+    if (hasProcess) {
+      try {
+        const cwd = process.cwd();
+        if (normalized.startsWith(cwd)) {
+          normalized = normalized.slice(cwd.length);
+          if (normalized.startsWith("/") || normalized.startsWith("\\")) {
+            normalized = normalized.slice(1);
+          }
+        }
+      } catch {
+        // ignore cwd resolution failures, fall back to absolute path
+      }
+    }
+  }
+  return normalized;
 }
 
 function getLocation(useRelative: boolean): string {
@@ -130,41 +196,9 @@ function getLocation(useRelative: boolean): string {
   const m =
     line.match(/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
   if (m) {
-    let file = m[1];
+    let file = sanitizePath(m[1], useRelative);
     const row = m[2];
-    try {
-      if (file.startsWith("file://")) {
-        file = fileURLToPath(file);
-      }
-    } catch {
-      // ignore conversion failure, fall back to original file string
-    }
-    let displayPath = file;
-    if (useRelative) {
-      let relative = path.relative(process.cwd(), file);
-      if (!relative || relative.startsWith("..")) {
-        relative = "";
-      }
-      if (
-        relative &&
-        !relative.includes(path.sep) &&
-        relative === path.basename(relative)
-      ) {
-        const parent = path.dirname(process.cwd());
-        if (parent && parent !== process.cwd()) {
-          const parentRelative = path.relative(parent, file);
-          if (
-            parentRelative &&
-            !parentRelative.startsWith("..") &&
-            parentRelative.includes(path.sep)
-          ) {
-            relative = parentRelative;
-          }
-        }
-      }
-      displayPath = relative || file;
-    }
-    return `${displayPath}:${row}`;
+    return `${file}:${row}`;
   }
   return "unknown";
 }
