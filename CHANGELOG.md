@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.7.0...v1.8.0) (2025-12-13)
+
+
+### Features
+
+* Enhance stack trace parsing to exclude console and logger frames for better location accuracy ([1df2f4b](https://github.com/RookiePlayers/ruki-logger-js/commit/1df2f4bdb9799070c846f81c5990ba10d7788078))
+
 # [1.7.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.5...v1.7.0) (2025-12-13)
 
 
