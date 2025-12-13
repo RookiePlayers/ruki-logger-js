@@ -196,33 +196,21 @@ function sanitizePath(file: string, useRelative: boolean): string {
   return normalized;
 }
 
-function getLocation(useRelative: boolean, stackDepth: number = 6): string {
+function getLocationLegacy(useRelative: boolean, stackDepth: number = 6): string {
   const err = new Error();
   const stackLines = (err.stack || "").split("\n").map((line) => line.trim());
-  const loggerFramePatterns = [
-    /ruki-logger/i,
-    /logger\.ts/i,
-    /logger\.js/i,
-    /logWithLevel/i,
-    /\bLogger\./,
-  ];
   const isLoggerFrame = (line: string) =>
-    loggerFramePatterns.some((pattern) => pattern.test(line));
+    /ruki-logger/i.test(line) || /logger\.ts/.test(line);
   const isNodeInternal = (line: string) =>
     /\bnode:internal\b/.test(line) || /\binternal\//.test(line);
-  const isConsoleFrame = (line: string) => /\bconsole\./i.test(line);
-  const hasLocation = (line: string) =>
-    /\((.*):(\d+):(\d+)\)/.test(line) || /at (.*):(\d+):(\d+)/.test(line) || /(https?:\/\/[^\s)]+):\d+:\d+/.test(line);
   const isCandidateFrame = (line: string) =>
     !isNodeInternal(line) &&
     !isLoggerFrame(line) &&
-    !isConsoleFrame(line) &&
-    hasLocation(line);
+    (/\((.*):(\d+):(\d+)\)/) || line.match(/at (.*):(\d+):(\d+)/);
   const candidates = stackLines.filter((line) => isCandidateFrame(line));
   const depthIndex = Math.max(0, Math.min((stackDepth || 1) - 1, Math.max(0, candidates.length - 1)));
   const frame =
     candidates[depthIndex] ||
-    candidates[0] ||
     stackLines.find((line) => isCandidateFrame(line)) ||
     "";
   const match =
@@ -236,6 +224,60 @@ function getLocation(useRelative: boolean, stackDepth: number = 6): string {
   }
   return "unknown";
 }
+
+
+function getLocationBrowserAware(useRelative: boolean, stackDepth: number = 6): string {
+  const err = new Error();
+  const stackLines = (err.stack || "").split("\n").map((line) => line.trim());
+  const isLoggerFrame = (line: string) =>
+    /ruki-logger/i.test(line) || /logger\.ts/.test(line);
+  const isNodeInternal = (line: string) =>
+    /\bnode:internal\b/.test(line) || /\binternal\//.test(line);
+  const isConsoleFrame = (line: string) => /\bconsole\./i.test(line);
+
+  const parseFrame = (line: string): { file: string; row: string } | null => {
+    const patterns = [
+      /^\s*at\s+[^(]*\((.*):(\d+):\d+\)/, // at func (file:line:col)
+      /^\s*at\s+(.*):(\d+):\d+/, // at file:line:col
+      /\((.*):(\d+):\d+\)/, // (file:line:col)
+      /(https?:\/\/[^\s)]+|file:\/\/[^\s)]+|[^()\s]+):(\d+):\d+/, // file:line:col
+      /(https?:\/\/[^\s)]+|file:\/\/[^\s)]+|[^()\s]+):(\d+)/, // missing column
+    ];
+    for (const pattern of patterns) {
+      const match = line.match(pattern);
+      if (match) {
+        return { file: match[1], row: match[2] };
+      }
+    }
+    return null;
+  };
+
+  const parsedFrames = stackLines
+    .map((line) => ({ line, parsed: parseFrame(line) }))
+    .filter((entry) => entry.parsed !== null);
+
+  const usable = parsedFrames.filter(
+    ({ line }) => !isLoggerFrame(line) && !isNodeInternal(line) && !isConsoleFrame(line),
+  );
+
+  const depthIndex = Math.max(
+    0,
+    Math.min((stackDepth || 1) - 1, Math.max(0, usable.length - 1)),
+  );
+  const selected =
+    usable[depthIndex] ||
+    usable[0] ||
+    parsedFrames.find(({ line }) => !isLoggerFrame(line) && !isNodeInternal(line)) ||
+    parsedFrames[0];
+
+  if (selected?.parsed) {
+    const file = sanitizePath(selected.parsed.file, useRelative);
+    const row = selected.parsed.row;
+    return `${file}:${row}`;
+  }
+  return "unknown";
+}
+
 
 function pad(
   string?: string,
@@ -629,7 +671,11 @@ function buildLogLine(params: {
   const tokens = getFormatTokens(options.format);
   const useRelative = options.locationPath !== "absolute";
   const locationDepth = options.locationStackDepth;
-  const location = getLocation(useRelative, locationDepth);
+  const resolver = options.locationResolver ?? "default";
+  const location =
+    resolver === "browserAware"
+      ? getLocationBrowserAware(useRelative, locationDepth)
+      : getLocationLegacy(useRelative, locationDepth);
   const hideTimestamp = options.hideTimestamp ?? true;
   const showLocation = options.showLocation ?? true;
   const tagLabel = options.tag ?? DEFAULT_TAGS[level];

@@ -91,7 +91,12 @@ export type LoggerOptions = {
   colorOptions?: LoggerColorOptions;
   /**
    * Control min/max widths for each segment to keep logs evenly spaced.
-   */
+ */
   cellSizes?: LoggerCellSizeOptions;
   enableLevelTagging?: boolean;
+  /**
+   * Choose which stack parser to use for the location segment.
+   * "default" mirrors the original behavior; "browserAware" is more tolerant of RN/Chrome stacks.
+   */
+  locationResolver?: "default" | "browserAware";
 };
