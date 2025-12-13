@@ -6,6 +6,8 @@ export enum LogLevel {
   highlight = "highlight",
   warn = "warn",
   task = "task",
+  table = "table",
+  silent = "silent",
   quiet = "quiet",
   custom = "custom"
 }
@@ -61,7 +63,7 @@ export type LoggerOptions = {
    * Controls how file paths appear in the location suffix.
    * Defaults to "relative".
    */
- locationPath?: "relative" | "absolute";
+  locationPath?: "relative" | "absolute";
   /**
    * Which stack frame to use for the reported location (1 = immediate caller). Defaults to 1.
    */

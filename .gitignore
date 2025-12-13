@@ -38,3 +38,4 @@ logs/
 __tests__/coverage/
 coverage/
 /clockit_backup_*.csv
+example/table_logs.csv

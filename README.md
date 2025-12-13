@@ -23,7 +23,7 @@ A colorful,Configurable location‑aware logger.
 - Timestamps, level tags, and source **file:line** location
 - Pretty colors via **chalk**
 - Pluggable sinks via a `LoggingRegistry` (for piping logs to files, DBs, APMs, etc.)
-- Tiny, framework‑agnostic API mirroring your Dart methods: `log`, `error`, `test`, `highlight`, `warn`, `info`, `task`, `custom(hex)`
+- Tiny, framework‑agnostic API mirroring your Dart methods: `log`, `error`, `test`, `highlight`, `warn`, `info`, `task`, `table`, `quiet`, `silent`, `custom(hex)`
 
 <div style="display: inline-block">
 <img width="1052" height="219" alt="image" style="padding:12px" src="https://github.com/user-attachments/assets/e58d25a4-cbbb-4d36-8aab-eb6798d79bc5" />
@@ -59,8 +59,19 @@ Logger.task("Build completed");
 Logger.highlight("Important");
 Logger.test("Only during tests? up to you!");
 Logger.custom("Any hex color works", "#9b59b6");
+Logger.table(
+  [
+    { id: 1, name: "Alice", score: 92 },
+    { id: 2, name: "Bob", score: 81 },
+  ],
+  { tag: "STATS", label: "Leaderboard", hideTimestamp: false },
+);
+Logger.silent("Emit to sinks without console noise");
 Logger.info("User payload", { id: 42, name: "Jane" }, { tag: "API" }); // console.log-style varargs
 ```
+
+`Logger.silent` will emit to all registered sinks but skip console output; `Logger.quiet` does the reverse (console only, no sinks).
+`Logger.table` prints timestamp/location header followed by a console table; when `silent: true`, it only emits a CSV payload to sinks.
 
 ### Configuration examples
 

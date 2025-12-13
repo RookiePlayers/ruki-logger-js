@@ -74,6 +74,8 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
   [LogLevel.highlight]: "#ffff00",
   [LogLevel.warn]: "#ffc400",
   [LogLevel.task]: "#41c541",
+  [LogLevel.table]: "#54a0ff",
+  [LogLevel.silent]: "#545454",
   [LogLevel.quiet]: "#545454",
   [LogLevel.custom]: "#bcbcbc",
 };
@@ -85,6 +87,8 @@ const LEVEL_ALIAS: Record<LogLevel, string> = {
   [LogLevel.highlight]: "H",
   [LogLevel.warn]: "W",
   [LogLevel.task]: "TK",
+  [LogLevel.table]: "TB",
+  [LogLevel.silent]: "S",
   [LogLevel.quiet]: "Q",
   [LogLevel.custom]: "C",
 };
@@ -96,6 +100,8 @@ const DEFAULT_TAGS: Record<LogLevel, string> = {
   [LogLevel.highlight]: "HIGHLIGHT",
   [LogLevel.warn]: "WARNING",
   [LogLevel.task]: "TASK",
+  [LogLevel.table]: "TABLE",
+  [LogLevel.silent]: "SILENT",
   [LogLevel.quiet]: "QUIET",
   [LogLevel.custom]: "CUSTOM",
 };
@@ -418,6 +424,86 @@ function mergeOptionSets(
   } as LoggerOptions;
 }
 
+type TableInput =
+  | Array<Record<string, unknown>>
+  | Array<unknown[]>;
+
+type TableLogOptions = LoggerOptions & {
+  headers?: string[];
+  label?: string;
+  /**
+   * When true, emit to sinks only and skip console output.
+   */
+  silent?: boolean;
+};
+
+function normalizeTableData(
+  data: TableInput,
+  headers?: string[],
+): {
+  headers: string[];
+  rows: string[][];
+  objects: Record<string, unknown>[];
+} {
+  if (!Array.isArray(data)) {
+    return { headers: headers ?? [], rows: [], objects: [] };
+  }
+  const isObjectArray = data.every((row) => !Array.isArray(row) && isPlainObject(row));
+  if (isObjectArray) {
+    const discoveredHeaders = headers && headers.length > 0
+      ? headers
+      : Array.from(new Set((data as Array<Record<string, unknown>>).flatMap((row) => Object.keys(row))));
+    const rows = (data as Array<Record<string, unknown>>).map((row) =>
+      discoveredHeaders.map((key) => stringifyValue(row[key])),
+    );
+    const objects = (data as Array<Record<string, unknown>>).map((row) => {
+      const obj: Record<string, unknown> = {};
+      for (const key of discoveredHeaders) {
+        obj[key] = row[key];
+      }
+      return obj;
+    });
+    return { headers: discoveredHeaders, rows, objects };
+  }
+
+  const arrayRows = data as Array<unknown[]>;
+  const widest = Math.max(
+    headers?.length ?? 0,
+    ...arrayRows.map((row) => (Array.isArray(row) ? row.length : 0)),
+  );
+  const finalHeaders =
+    headers && headers.length > 0
+      ? headers
+      : Array.from({ length: widest }, (_v, idx) => `col_${idx + 1}`);
+  const rows = arrayRows.map((row) =>
+    finalHeaders.map((_h, idx) => stringifyValue(Array.isArray(row) ? row[idx] : undefined)),
+  );
+  const objects = arrayRows.map((row) =>
+    finalHeaders.reduce<Record<string, unknown>>((acc, header, idx) => {
+      acc[header] = Array.isArray(row) ? row[idx] : undefined;
+      return acc;
+    }, {}),
+  );
+  return { headers: finalHeaders, rows, objects };
+}
+
+function csvEscape(value: string): string {
+  const needsQuote = /[",\n]/.test(value);
+  if (!needsQuote) return value;
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function toCsv(headers: string[], rows: string[][]): string {
+  const lines: string[] = [];
+  if (headers.length > 0) {
+    lines.push(headers.map(csvEscape).join(","));
+  }
+  for (const row of rows) {
+    lines.push(row.map(csvEscape).join(","));
+  }
+  return lines.join("\n");
+}
+
 type ChalkAdapter = {
   bgHex?: (hex: string) => (text: string) => string;
   hex?: (hex: string) => (text: string) => string;
@@ -595,10 +681,11 @@ export class Logger {
 
   private static logWithLevel(
     level: LogLevel,
-    consoleMethod: "log" | "warn" | "error",
+    consoleMethod: "log" | "warn" | "error" | undefined,
     args: unknown[],
     baseOptions?: LoggerOptions,
     emitToRegistry: boolean = true,
+    logToConsole: boolean = true,
   ) {
     const { args: messages, options } = splitArgsAndOptions(args);
     const mergedBase = mergeOptionSets(baseOptions, options);
@@ -622,7 +709,9 @@ export class Logger {
       });
     }
 
-    console[consoleMethod](payload.text);
+    if (logToConsole && consoleMethod) {
+      console[consoleMethod](payload.text);
+    }
     this.lastLogTimestampMs = Date.now();
   }
 
@@ -660,6 +749,50 @@ export class Logger {
   static info(...args: unknown[]): void;
   static info(...args: unknown[]): void {
     this.logWithLevel(LogLevel.info, "log", args);
+  }
+
+  static silent(message: unknown, options?: LoggerOptions): void;
+  static silent(...args: unknown[]): void;
+  static silent(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.silent, "log", args, undefined, true, false);
+  }
+
+  static table(
+    data: TableInput,
+    options?: TableLogOptions,
+  ): void {
+    const merged = this.mergeOptions(
+      mergeOptionSets(
+        { hideTimestamp: false, showLocation: true, locationStackDepth: (options?.locationStackDepth ?? 6) -1 },
+        options,
+      ),
+    );
+    const label = options?.label ?? "TABLE";
+    const payload = buildLogLine({
+      level: LogLevel.table,
+      message: label,
+      options: merged,
+      lastTimestampMs: this.lastLogTimestampMs,
+    });
+    const tableData = normalizeTableData(data, options?.headers);
+    const csv = toCsv(tableData.headers, tableData.rows);
+    LoggingRegistry.emit(LogLevel.table, {
+      message: csv,
+      location: payload.location,
+      timestamp: isoTimestamp(),
+      raw: data,
+      level: LogLevel.table,
+      tag: payload.tag,
+    });
+    if (!options?.silent) {
+      console.log(payload.text);
+      if (typeof console.table === "function") {
+        console.table(tableData.objects);
+      } else {
+        console.log(csv);
+      }
+    }
+    this.lastLogTimestampMs = Date.now();
   }
 
   static quiet(message: unknown, options?: LoggerOptions): void;

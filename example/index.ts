@@ -43,6 +43,11 @@ const unsubscribe = LoggingRegistry.addSink((level, payload) => {
     saveTofile("highlight_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
   }else if (level === LogLevel.task) {
     saveTofile("task_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.silent) {
+    saveTofile("silent_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
+  }else if (level === LogLevel.table) {
+    // payload.message is a CSV string
+    saveTofile("table_logs.csv", `${payload.message}\n`);
   }else{
     saveTofile("custom_logs.txt", `${payload.timestamp} [${level.toUpperCase()}] ${payload.message} Location: ${payload.location}\n`);
   }
@@ -56,6 +61,21 @@ Logger.task("Build completed");
 Logger.highlight("Important");
 Logger.test("Only during tests? up to you!");
 Logger.custom("Any hex color works", "#9b59b6");
+Logger.silent("Sent to sinks only; console remains quiet");
+Logger.table(
+  [
+    { id: 1, name: "Alice", score: 92 },
+    { id: 2, name: "Bob", score: 81 },
+  ],
+  { tag: "STATS", label: "Leaderboard", hideTimestamp: false },
+);
+Logger.table(
+  [
+    ["GET", "/healthz", 200],
+    ["POST", "/api/login", 401],
+  ],
+  { headers: ["method", "path", "status"], tag: "CSV_ONLY", silent: true },
+);
 
 // 1. Default (relative file paths, timestamp hidden)
 Logger.info("Server ready");

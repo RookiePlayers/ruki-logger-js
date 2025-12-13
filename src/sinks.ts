@@ -26,6 +26,7 @@ export abstract class LoggerSinkConfig {
     abstract saveAsInfoLogs(payload: LogPayload): Promise<boolean>;
     abstract saveToWarningLogs(payload: LogPayload): Promise<boolean>;
     abstract saveAsGeneralLogs(payload: LogPayload): Promise<boolean>;
+    abstract saveAsTableLogs(payload: LogPayload): Promise<boolean>;
     async saveAs(payload: LogPayload): Promise<boolean> {
         switch (payload.level) {
             case LogLevel.error:
@@ -34,6 +35,8 @@ export abstract class LoggerSinkConfig {
                 return this.saveAsInfoLogs(payload);
             case LogLevel.warn:
                 return this.saveToWarningLogs(payload);
+            case LogLevel.table:
+                return this.saveAsTableLogs(payload);
             default:
                 return this.saveAsGeneralLogs(payload);
         }
@@ -66,6 +69,8 @@ export class FileSyncLoggerConfig extends LoggerSinkConfig {
             test: 'general',
             highlight: 'general',
             task: 'general',
+            table: 'tables',
+            silent: 'general',
             quiet: 'general',
             custom: 'general'
         };
@@ -120,10 +125,17 @@ export class FileSyncLoggerConfig extends LoggerSinkConfig {
         return true;
     }
 
+    async saveAsTableLogs(log: LogPayload): Promise<boolean> {
+        const csvFile = `${this.logFilePath.table ?? 'tables'}/${this.getLogFileNameByDate().replace('.log', '.csv')}`;
+        const csv = log.message.endsWith("\n") ? log.message : `${log.message}\n`;
+        await this.saveTofile(csvFile, csv);
+        return true;
+    }
+
     async saveAsGeneralLogs(log: LogPayload): Promise<boolean> {
         const str = `${log.timestamp} [${log.level}|${log.tag}]${log.message} Location:${log.location}\n`;
         await this.saveTofile(
-            this.logFilePath.custom ?? this.logFilePath.test ?? this.logFilePath.highlight ?? this.logFilePath.task ?? this.logFilePath.quiet ??
+            this.logFilePath.custom ?? this.logFilePath.test ?? this.logFilePath.highlight ?? this.logFilePath.task ?? this.logFilePath.table ?? this.logFilePath.silent ?? this.logFilePath.quiet ??
             `general/${this.getLogFileNameByDate()}`, str);
         return true;
     }
@@ -136,6 +148,8 @@ export class FileSyncLoggerConfig extends LoggerSinkConfig {
                 return this.saveAsInfoLogs(payload);
             case LogLevel.warn:
                 return this.saveToWarningLogs(payload);
+            case LogLevel.table:
+                return this.saveAsTableLogs(payload);
             default:
                 return this.saveAsGeneralLogs(payload);
         }
