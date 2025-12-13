@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.5...v1.7.0) (2025-12-13)
+
+
+### Features
+
+* **logger:** Add table and silent log levels with CSV support ([9b3f2a6](https://github.com/RookiePlayers/ruki-logger-js/commit/9b3f2a647b4bca4c883dd096082d703b241de402))
+
 ## [1.6.5](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.6.4...v1.6.5) (2025-12-05)
 
 
