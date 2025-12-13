@@ -1,6 +1,6 @@
 {
   "name": "ruki-logger",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "A colorful, location-aware logger inspired by the user's Flutter/Dart logger, for Node.js/TypeScript.",
   "keywords": [
     "logger",
