@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.8.1...v1.9.0) (2025-12-14)
+
+
+### Features
+
+* **logger:** Add debug level logging and enhance README documentation ([588dd42](https://github.com/RookiePlayers/ruki-logger-js/commit/588dd42aaa6d8931b91a491071cd6e832fb7ed9b))
+
 ## [1.8.1](https://github.com/RookiePlayers/ruki-logger-js/compare/v1.8.0...v1.8.1) (2025-12-13)
 
 
