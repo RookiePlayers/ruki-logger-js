@@ -72,7 +72,8 @@ export class FileSyncLoggerConfig extends LoggerSinkConfig {
             table: 'tables',
             silent: 'general',
             quiet: 'general',
-            custom: 'general'
+            custom: 'general',
+            debug: 'general'
         };
     }
     private saveTofile = async (filename: string, data: string) => {

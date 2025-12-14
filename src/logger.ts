@@ -69,6 +69,7 @@ const DEFAULT_FORMAT_TOKENS = parseFormatString(DEFAULT_FORMAT)!;
 
 const LEVEL_COLORS: Record<LogLevel, string> = {
   [LogLevel.info]: "#f5f5f5",
+  [LogLevel.debug]: "#7f8c8d",
   [LogLevel.error]: "#ce2727",
   [LogLevel.test]: "#219f21",
   [LogLevel.highlight]: "#ffff00",
@@ -82,6 +83,7 @@ const LEVEL_COLORS: Record<LogLevel, string> = {
 
 const LEVEL_ALIAS: Record<LogLevel, string> = {
   [LogLevel.info]: "I",
+  [LogLevel.debug]: "D",
   [LogLevel.error]: "E",
   [LogLevel.test]: "TS",
   [LogLevel.highlight]: "H",
@@ -95,6 +97,7 @@ const LEVEL_ALIAS: Record<LogLevel, string> = {
 
 const DEFAULT_TAGS: Record<LogLevel, string> = {
   [LogLevel.info]: "INFO",
+  [LogLevel.debug]: "DEBUG",
   [LogLevel.error]: "ERROR",
   [LogLevel.test]: "TEST",
   [LogLevel.highlight]: "HIGHLIGHT",
@@ -807,6 +810,12 @@ export class Logger {
   static info(...args: unknown[]): void;
   static info(...args: unknown[]): void {
     this.logWithLevel(LogLevel.info, "log", args);
+  }
+
+  static debug(message: unknown, options?: LoggerOptions): void;
+  static debug(...args: unknown[]): void;
+  static debug(...args: unknown[]): void {
+    this.logWithLevel(LogLevel.debug, "log", args);
   }
 
   static silent(message: unknown, options?: LoggerOptions): void;
